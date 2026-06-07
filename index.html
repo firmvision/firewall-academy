@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Firewall Academy — OPNsense, Beginner to Pro</title>
+<style>
+  :root{
+    --bg:#0b0f17; --bg2:#111826; --panel:#151d2b; --panel2:#1b2536;
+    --line:#243047; --line2:#2e3c57;
+    --txt:#e6edf6; --mut:#8b9bb4; --mut2:#6b7a93;
+    --accent:#38e1b0; --accent2:#2bb6 ; --accent-d:#0f3d33;
+    --blue:#4ea0ff; --amber:#ffb454; --red:#ff6b6b; --purple:#b48bff;
+    --green:#38e1b0;
+    --radius:14px; --shadow:0 10px 30px rgba(0,0,0,.35);
+    --mono:'SFMono-Regular',ui-monospace,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:radial-gradient(1200px 600px at 80% -10%,#152138 0%,var(--bg) 60%);color:var(--txt);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:var(--blue);text-decoration:none}
+  ::selection{background:var(--accent-d);color:#fff}
+
+  .app{display:grid;grid-template-columns:300px 1fr;min-height:100vh}
+  /* Sidebar */
+  .side{background:linear-gradient(180deg,var(--bg2),#0c121d);border-right:1px solid var(--line);padding:22px 16px;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .brand{display:flex;align-items:center;gap:11px;margin-bottom:4px;padding:0 6px}
+  .logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#2b8fff);display:grid;place-items:center;box-shadow:0 6px 18px rgba(56,225,176,.25)}
+  .logo svg{width:22px;height:22px}
+  .brand h1{font-size:16px;margin:0;letter-spacing:.2px}
+  .brand p{margin:0;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:1.5px}
+
+  .progwrap{margin:18px 6px 22px}
+  .progwrap .lbl{display:flex;justify-content:space-between;font-size:11px;color:var(--mut);margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px}
+  .bar{height:8px;background:#0c1320;border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+  .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--blue));transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+  .nav-section{font-size:10px;text-transform:uppercase;letter-spacing:1.4px;color:var(--mut2);margin:16px 8px 8px}
+  .modlink{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;cursor:pointer;color:var(--mut);font-size:13.5px;font-weight:500;transition:.15s;margin-bottom:2px;position:relative}
+  .modlink:hover{background:var(--panel);color:var(--txt)}
+  .modlink.active{background:linear-gradient(90deg,rgba(56,225,176,.14),rgba(78,160,255,.06));color:var(--txt)}
+  .modlink.active::before{content:"";position:absolute;left:-16px;top:8px;bottom:8px;width:3px;background:var(--accent);border-radius:0 3px 3px 0}
+  .modlink .ico{width:26px;height:26px;border-radius:7px;background:var(--panel2);display:grid;place-items:center;font-size:13px;flex:none}
+  .modlink.active .ico{background:var(--accent-d)}
+  .modlink .meta{flex:1;min-width:0}
+  .modlink .t{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .modlink .s{font-size:10.5px;color:var(--mut2)}
+  .check{width:16px;height:16px;border-radius:99px;border:1.5px solid var(--line2);flex:none;display:grid;place-items:center;font-size:9px}
+  .check.done{background:var(--accent);border-color:var(--accent);color:#06281f}
+
+  /* Main */
+  .main{padding:0;min-width:0}
+  .topbar{position:sticky;top:0;z-index:10;background:rgba(11,15,23,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:14px 40px;display:flex;align-items:center;gap:16px}
+  .crumb{font-size:12px;color:var(--mut);flex:1}
+  .crumb b{color:var(--txt);font-weight:600}
+  .pill{font-size:11px;padding:5px 11px;border-radius:99px;border:1px solid var(--line2);color:var(--mut);background:var(--panel)}
+  .lvl-1{color:var(--green);border-color:#1c4d40}
+  .lvl-2{color:var(--blue);border-color:#1d3a5c}
+  .lvl-3{color:var(--amber);border-color:#5c4620}
+  .lvl-4{color:var(--purple);border-color:#42305c}
+
+  .content{padding:36px 40px 90px;max-width:880px}
+  .reset-btn{font-size:11px;color:var(--mut2);background:none;border:1px solid var(--line);padding:5px 10px;border-radius:8px;cursor:pointer}
+  .reset-btn:hover{color:var(--red);border-color:#4d2424}
+
+  /* Home / hero */
+  .hero h2{font-size:30px;margin:0 0 10px;letter-spacing:-.5px}
+  .hero p.lead{font-size:16px;color:var(--mut);margin:0 0 28px;max-width:640px}
+  .track-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-top:8px}
+  .track-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;cursor:pointer;transition:.18s;position:relative;overflow:hidden}
+  .track-card:hover{transform:translateY(-3px);border-color:var(--line2);box-shadow:var(--shadow)}
+  .track-card .badge{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--mut2);font-weight:600}
+  .track-card h3{margin:10px 0 6px;font-size:16px}
+  .track-card p{margin:0;font-size:13px;color:var(--mut)}
+  .track-card .mini{height:5px;border-radius:99px;background:#0c1320;margin-top:14px;overflow:hidden}
+  .track-card .mini i{display:block;height:100%;background:var(--accent)}
+  .track-card .n{position:absolute;top:14px;right:16px;font-size:26px;font-weight:800;color:var(--line2);font-family:var(--mono)}
+
+  /* Lesson */
+  h2.lesson-t{font-size:25px;margin:0 0 6px;letter-spacing:-.3px}
+  .lesson-sub{color:var(--mut);font-size:14px;margin:0 0 26px}
+  .content h3{font-size:18px;margin:30px 0 10px;color:var(--txt)}
+  .content h4{font-size:14.5px;margin:22px 0 6px;color:var(--accent);text-transform:uppercase;letter-spacing:.6px}
+  .content p{margin:0 0 14px;color:#d4deec}
+  .content ul{margin:0 0 16px;padding-left:0;list-style:none}
+  .content ul li{position:relative;padding-left:22px;margin-bottom:9px;color:#d4deec}
+  .content ul li::before{content:"";position:absolute;left:4px;top:10px;width:6px;height:6px;border-radius:2px;background:var(--accent);transform:rotate(45deg)}
+  .content ol{margin:0 0 16px;padding-left:20px;color:#d4deec}
+  .content ol li{margin-bottom:9px;padding-left:4px}
+  code{font-family:var(--mono);background:#0c1320;padding:2px 6px;border-radius:5px;font-size:12.5px;color:#9fe8d2;border:1px solid var(--line)}
+  pre{background:#0a0f1a;border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;margin:0 0 18px}
+  pre code{background:none;border:none;padding:0;color:#c8d6e8;font-size:12.5px;line-height:1.7;display:block}
+  .tok-c{color:#5e7290} /* comment */
+  .tok-k{color:#ff9d6b} /* keyword */
+  .tok-s{color:#9fe8d2} /* string */
+
+  .callout{border-radius:12px;padding:14px 16px 14px 44px;margin:0 0 18px;position:relative;font-size:13.5px;border:1px solid}
+  .callout .ci{position:absolute;left:14px;top:14px;font-size:15px}
+  .callout.tip{background:rgba(56,225,176,.07);border-color:#1c4d40}
+  .callout.warn{background:rgba(255,180,84,.07);border-color:#5c4620}
+  .callout.note{background:rgba(78,160,255,.07);border-color:#1d3a5c}
+  .callout.pro{background:rgba(180,139,255,.07);border-color:#42305c}
+  .callout b{color:var(--txt)}
+
+  .gui-path{display:inline-flex;align-items:center;gap:6px;background:#0c1320;border:1px solid var(--line);border-radius:7px;padding:3px 9px;font-size:12px;font-family:var(--mono);color:#bcd;margin:0 2px}
+  .gui-path span{color:var(--mut2)}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:0 0 20px;font-size:13px}
+  table.tbl th{text-align:left;padding:9px 12px;background:var(--panel2);color:var(--mut);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--line2)}
+  table.tbl td{padding:9px 12px;border-bottom:1px solid var(--line);color:#d4deec;vertical-align:top}
+  table.tbl tr:last-child td{border-bottom:none}
+  table.tbl code{font-size:11.5px}
+
+  /* Quiz */
+  .quiz{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin-top:34px}
+  .quiz h3{margin:0 0 4px;font-size:17px;color:var(--txt)}
+  .quiz .qsub{font-size:12.5px;color:var(--mut);margin:0 0 20px}
+  .q{margin-bottom:22px}
+  .q .qt{font-weight:600;font-size:14px;margin-bottom:10px}
+  .q .qt span{color:var(--mut2);font-family:var(--mono);font-size:12px;margin-right:6px}
+  .opt{display:block;padding:11px 14px;border:1px solid var(--line);border-radius:9px;margin-bottom:8px;cursor:pointer;font-size:13.5px;transition:.12s;color:#d4deec}
+  .opt:hover{border-color:var(--line2);background:var(--panel2)}
+  .opt.sel{border-color:var(--blue);background:rgba(78,160,255,.08)}
+  .opt.correct{border-color:var(--green);background:rgba(56,225,176,.12);color:#fff}
+  .opt.wrong{border-color:var(--red);background:rgba(255,107,107,.1)}
+  .opt .mk{float:right;font-weight:700}
+  .quiz-actions{display:flex;align-items:center;gap:14px;margin-top:6px}
+  .btn{background:linear-gradient(135deg,var(--accent),#2b8fff);color:#06281f;border:none;padding:11px 20px;border-radius:9px;font-weight:700;font-size:13.5px;cursor:pointer;transition:.15s}
+  .btn:hover{filter:brightness(1.08)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn.ghost{background:none;border:1px solid var(--line2);color:var(--mut)}
+  .score{font-size:14px;font-weight:600}
+  .explain{font-size:12.5px;color:var(--mut);margin-top:8px;padding-left:14px;border-left:2px solid var(--line2);display:none}
+  .explain.show{display:block}
+
+  .nav-foot{display:flex;justify-content:space-between;margin-top:40px;gap:12px}
+  .nav-foot button{flex:1;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 18px;cursor:pointer;color:var(--txt);transition:.15s}
+  .nav-foot button:hover:not(:disabled){border-color:var(--accent);background:var(--panel2)}
+  .nav-foot button:disabled{opacity:.35;cursor:default}
+  .nav-foot button.next{text-align:right}
+  .nav-foot button .d{font-size:11px;color:var(--mut2);text-transform:uppercase;letter-spacing:.8px}
+  .nav-foot button .t{font-size:14px;font-weight:600;margin-top:2px}
+
+  /* Glossary */
+  .gloss-search{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;color:var(--txt);font-size:14px;margin-bottom:20px}
+  .gloss-search:focus{outline:none;border-color:var(--accent)}
+  .gterm{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px 18px;margin-bottom:10px}
+  .gterm b{color:var(--accent);font-size:14px}
+  .gterm .ab{color:var(--mut2);font-size:12px;font-family:var(--mono);margin-left:6px}
+  .gterm p{margin:6px 0 0;font-size:13px;color:#d4deec}
+
+  .completed-banner{background:linear-gradient(135deg,rgba(56,225,176,.14),rgba(78,160,255,.08));border:1px solid #1c4d40;border-radius:12px;padding:14px 18px;margin-bottom:24px;display:flex;align-items:center;gap:12px;font-size:13.5px}
+
+  @media(max-width:860px){
+    .app{grid-template-columns:1fr}
+    .side{display:none}
+    .content,.topbar{padding-left:20px;padding-right:20px}
+  }
+  .menu-btn{display:none}
+  @media(max-width:860px){.menu-btn{display:grid}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5l8-3z" fill="#06281f" stroke="#06281f" stroke-width="1.2"/><path d="M9 12l2 2 4-4" stroke="#06281f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <h1>Firewall Academy</h1>
+        <p>OPNsense · Zero → Pro</p>
+      </div>
+    </div>
+    <div class="progwrap">
+      <div class="lbl"><span>Your progress</span><span id="progPct">0%</span></div>
+      <div class="bar"><i id="progBar"></i></div>
+    </div>
+    <div class="nav-section">Curriculum</div>
+    <div id="navList"></div>
+    <div class="nav-section">Reference</div>
+    <div class="modlink" data-special="glossary" id="glossLink">
+      <div class="ico">📖</div><div class="meta"><span class="t">Glossary</span><span class="s">80+ terms</span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="crumb" id="crumb">Home</div>
+      <div class="pill" id="lvlPill" style="display:none"></div>
+      <button class="reset-btn" id="resetBtn">Reset progress</button>
+    </div>
+    <div class="content" id="content"></div>
+  </main>
+</div>
+
+<script>
+/* ============================================================
+   FIREWALL ACADEMY — content + engine
+   Self-contained. Progress saved to localStorage.
+============================================================ */
+
+const CURRICULUM = [
+  /* ===================== MODULE 1 ===================== */
+  {
+    id:"m1", icon:"🧱", level:1, levelName:"Foundations",
+    title:"How Networks & Firewalls Work",
+    subtitle:"The mental model everything else builds on",
+    lessons:[
+      {
+        t:"What a firewall really is",
+        sub:"Stop thinking 'magic box'. Start thinking 'traffic cop with a rulebook'.",
+        html:`
+<p>A firewall is a checkpoint between two networks — almost always between your trusted network (LAN) and the untrusted internet (WAN). Every packet that wants to cross has to be inspected against an ordered list of rules. The firewall's only real job: <b>decide allow or block, fast, for every packet.</b></p>
+<p>That's it. The "next-gen" features everyone talks about — intrusion detection, VPNs, web filtering — are powerful add-ons bolted onto that one core decision.</p>
+<h3>The three things every firewall inspects</h3>
+<ul>
+<li><b>Source & destination IP</b> — who's talking to whom.</li>
+<li><b>Source & destination port</b> — which service (port 443 = HTTPS, 22 = SSH, 53 = DNS).</li>
+<li><b>Protocol</b> — TCP, UDP, ICMP, etc.</li>
+</ul>
+<p>A rule is just a sentence built from those: <i>"Allow TCP traffic from LAN to any destination on port 443."</i> The firewall reads its rules top to bottom and acts on the <b>first one that matches</b>.</p>
+<div class="callout tip"><span class="ci">💡</span><b>First-match wins.</b> This single fact causes 80% of beginner firewall bugs. If a broad "allow everything" rule sits above your specific "block this" rule, the block never fires. Order is everything.</div>
+<h3>Stateful vs. stateless</h3>
+<p>Old firewalls were <b>stateless</b> — they judged every packet in total isolation. That's a problem: when you visit a website, your request goes out, but the reply needs to come back in. A stateless firewall would need you to manually open the return path, which is fragile and dangerous.</p>
+<p>Modern firewalls (OPNsense included) are <b>stateful</b>. They keep a <b>state table</b> of active connections. When you open a connection outbound, the firewall remembers it and automatically permits the matching return traffic — no return rule needed. When the connection closes, the state is removed.</p>
+<div class="callout note"><span class="ci">🔎</span><b>Why this matters for rules:</b> in OPNsense you generally only write rules for the <i>first</i> packet of a connection (the one initiating it). The replies are handled by state automatically. This is why a LAN with one "allow LAN to any" rule can browse the whole internet without any inbound rules.</div>
+`,
+        quiz:[
+          {q:"A firewall reads its rules and acts on…",opts:["The most specific rule anywhere in the list","The first rule that matches the packet","The last rule that matches the packet","A random matching rule"],a:1,ex:"First-match wins. Rule order determines behavior — broad allow rules placed too high will shadow specific rules below them."},
+          {q:"What does a stateful firewall let you avoid writing?",opts:["Outbound rules","Return-traffic rules for connections you initiated","Any rules at all","Logging rules"],a:1,ex:"The state table tracks connections you start and auto-permits their replies, so you don't hand-write return rules."},
+          {q:"Which trio does a basic rule match on?",opts:["IP, MAC, hostname","IP, port, protocol","Username, password, port","DNS, DHCP, NAT"],a:1,ex:"Source/dest IP, source/dest port, and protocol are the fundamental match fields."}
+        ]
+      },
+      {
+        t:"IP, ports, and the OSI model (the useful parts)",
+        sub:"Just enough networking to reason about firewall rules — no fluff.",
+        html:`
+<p>You don't need to memorize all seven OSI layers. You need the four that show up in firewall work every day.</p>
+<table class="tbl"><thead><tr><th>Layer</th><th>What lives here</th><th>Firewall relevance</th></tr></thead>
+<tbody>
+<tr><td>L2 — Data Link</td><td>MAC addresses, switches, VLANs</td><td>Network segmentation (VLANs)</td></tr>
+<tr><td>L3 — Network</td><td>IP addresses, routing</td><td>Source/dest IP rules, NAT</td></tr>
+<tr><td>L4 — Transport</td><td>TCP & UDP, port numbers</td><td>Port-based rules, state tracking</td></tr>
+<tr><td>L7 — Application</td><td>HTTP, DNS, TLS — the actual content</td><td>Deep packet inspection, IDS/IPS, web filtering</td></tr>
+</tbody></table>
+<h3>Private vs. public IP space</h3>
+<p>Inside your network you use <b>private</b> ranges that aren't routable on the public internet. Memorize these — you'll type them constantly:</p>
+<ul>
+<li><code>10.0.0.0/8</code> — huge, common in enterprises</li>
+<li><code>172.16.0.0/12</code> — medium</li>
+<li><code>192.168.0.0/16</code> — classic home/small-office</li>
+</ul>
+<h4>CIDR notation in 30 seconds</h4>
+<p>The <code>/24</code> after an IP tells you how many bits are the "network" part. <code>192.168.1.0/24</code> means the first 24 bits are fixed, leaving 8 bits (256 addresses) for hosts. Smaller number after the slash = bigger network.</p>
+<table class="tbl"><thead><tr><th>CIDR</th><th>Hosts</th><th>Use</th></tr></thead><tbody>
+<tr><td><code>/24</code></td><td>254 usable</td><td>A normal LAN</td></tr>
+<tr><td><code>/30</code></td><td>2 usable</td><td>Point-to-point link</td></tr>
+<tr><td><code>/16</code></td><td>65,534</td><td>Large network / supernet</td></tr>
+<tr><td><code>/32</code></td><td>1</td><td>A single host (used a lot in rules)</td></tr>
+</tbody></table>
+<h3>Ports worth knowing cold</h3>
+<table class="tbl"><thead><tr><th>Port</th><th>Service</th><th>Port</th><th>Service</th></tr></thead><tbody>
+<tr><td>22</td><td>SSH</td><td>443</td><td>HTTPS / TLS</td></tr>
+<tr><td>53</td><td>DNS</td><td>3389</td><td>RDP (Windows remote)</td></tr>
+<tr><td>80</td><td>HTTP</td><td>51820</td><td>WireGuard VPN</td></tr>
+<tr><td>123</td><td>NTP (time)</td><td>1194</td><td>OpenVPN</td></tr>
+</tbody></table>
+<div class="callout tip"><span class="ci">💡</span><b>Career habit:</b> when you see traffic on a port, get fluent at asking "what service is that, and should this host be using it?" Unexpected port activity is one of the earliest signals of compromise.</div>
+`,
+        quiz:[
+          {q:"What does the /24 in 192.168.1.0/24 indicate?",opts:["256 networks","The first 24 bits are the network portion (254 usable hosts)","24 usable hosts","Port 24 is open"],a:1,ex:"/24 fixes the first 24 bits, leaving 8 host bits = 256 addresses, 254 usable."},
+          {q:"Which is NOT a private IP range?",opts:["10.0.0.0/8","172.16.0.0/12","192.168.0.0/16","8.8.8.0/24"],a:3,ex:"8.8.8.0 is public space (Google DNS). The other three are RFC1918 private ranges."},
+          {q:"IDS/IPS and web filtering operate primarily at which layer?",opts:["L2","L3","L4","L7 (application)"],a:3,ex:"Inspecting actual content (HTTP, TLS, DNS payloads) is application-layer work."},
+          {q:"Port 51820 is the default for…",opts:["OpenVPN","SSH","WireGuard","RDP"],a:2,ex:"WireGuard defaults to UDP 51820 — you'll set this when configuring the VPN later."}
+        ]
+      },
+      {
+        t:"NAT, the default-deny philosophy & defense in depth",
+        sub:"The security principles that separate hobbyists from professionals.",
+        html:`
+<h3>NAT — why your phone and laptop share one public IP</h3>
+<p>Your ISP gives you (usually) one public IP. Yet dozens of devices get online. <b>Network Address Translation</b> rewrites the source address of outbound packets to your single public IP, tracks the mapping, and reverses it on the way back. This is <b>outbound NAT (source NAT)</b> and it happens automatically.</p>
+<p>The reverse — <b>port forwarding (destination NAT)</b> — lets outside traffic reach a specific internal server. You'll configure this when you want to host a game server or expose a service. It's powerful and risky: every port forward is a hole you deliberately punched in your wall.</p>
+<div class="callout warn"><span class="ci">⚠️</span><b>NAT is not a security feature.</b> It's an addressing convenience that <i>happens</i> to hide internal hosts. Never rely on "I'm behind NAT" as your security model. The firewall ruleset is what protects you.</div>
+<h3>Default-deny: the only sane starting posture</h3>
+<p>There are two ways to build a ruleset:</p>
+<ul>
+<li><b>Default-allow</b> (blocklist): permit everything, then block known-bad. You will always be one unknown threat behind. <b>Don't do this.</b></li>
+<li><b>Default-deny</b> (allowlist): block everything, then explicitly permit only what's needed. This is the professional standard.</li>
+</ul>
+<p>OPNsense's WAN comes default-deny out of the box: nothing from the internet gets in unless you allow it. Good security work is mostly the discipline of keeping your allow-list as small as possible.</p>
+<h3>Defense in depth</h3>
+<p>No single control is perfect, so professionals layer them. If one fails, the next catches the threat:</p>
+<ul>
+<li><b>Perimeter:</b> the firewall ruleset + default-deny.</li>
+<li><b>Detection:</b> IDS/IPS watching for attack patterns (Suricata — Module 4).</li>
+<li><b>Segmentation:</b> VLANs so a compromised IoT camera can't reach your laptop (Module 4).</li>
+<li><b>Encryption in transit:</b> VPNs for remote access (Module 3).</li>
+<li><b>Logging & monitoring:</b> you can't defend what you can't see (Module 5).</li>
+</ul>
+<div class="callout pro"><span class="ci">🎯</span><b>Pro framing:</b> interviewers love asking "how would you secure X?" The winning answer is never one tool — it's <i>layers</i>. Lead with default-deny, then describe detection, segmentation, and monitoring as backstops.</div>
+`,
+        quiz:[
+          {q:"Outbound NAT primarily does what?",opts:["Encrypts your traffic","Rewrites internal source IPs to your public IP and tracks the mapping","Blocks malware","Assigns IP addresses"],a:1,ex:"Source NAT lets many private hosts share one public IP by rewriting and tracking source addresses."},
+          {q:"The professional default posture for a ruleset is…",opts:["Default-allow, block known-bad","Default-deny, allow only what's needed","No rules, rely on NAT","Allow all outbound, block all inbound"],a:1,ex:"Default-deny (allowlist) keeps the attack surface minimal. You can't blocklist threats you haven't seen yet."},
+          {q:"Why is 'I'm behind NAT' a weak security argument?",opts:["NAT is slow","NAT is an addressing convenience, not a security control; the ruleset is what protects you","NAT only works on IPv4","NAT encrypts nothing"],a:1,ex:"NAT incidentally hides hosts but provides no real policy enforcement. The firewall rules are the actual control."},
+          {q:"'Defense in depth' means…",opts:["Buying the most expensive firewall","Layering multiple independent controls so a single failure isn't fatal","Putting two firewalls in a row","Encrypting everything twice"],a:1,ex:"Layered, independent controls (perimeter, detection, segmentation, monitoring) back each other up."}
+        ]
+      }
+    ]
+  },
+
+  /* ===================== MODULE 2 ===================== */
+  {
+    id:"m2", icon:"⚙️", level:1, levelName:"Foundations",
+    title:"Installing OPNsense",
+    subtitle:"From bare metal (or a VM) to a working firewall",
+    lessons:[
+      {
+        t:"Why OPNsense, and what you need",
+        sub:"Picking hardware and understanding the architecture before you install.",
+        html:`
+<p>OPNsense is a free, fully open-source firewall/router platform built on <b>HardenedBSD</b> (a security-focused FreeBSD fork). In 2026 it's the recommended starting point for most people: modern UI, a fast and predictable release cadence (major releases in January and July, patches every two weeks), and — crucially — <b>no paywalled features</b>. The version you download for free is the same one running on the vendor's enterprise appliances.</p>
+<h3>The golden rule of firewall hardware: two NICs</h3>
+<p>A firewall sits <i>between</i> networks, so it needs at least <b>two network interfaces</b>:</p>
+<ul>
+<li><b>WAN</b> — plugs into your ISP modem (the untrusted side).</li>
+<li><b>LAN</b> — plugs into your switch / the rest of your network (the trusted side).</li>
+</ul>
+<div class="callout warn"><span class="ci">⚠️</span><b>A single-NIC box can't be a real firewall.</b> If you only have one port, you'd be routing traffic back out the same interface, which defeats the separation. Get a machine with two physical NICs, or a multi-port mini-PC.</div>
+<h3>Realistic hardware options</h3>
+<table class="tbl"><thead><tr><th>Option</th><th>Good for</th><th>Notes</th></tr></thead><tbody>
+<tr><td>Virtual machine (VirtualBox / Proxmox / VMware)</td><td>Learning, labbing</td><td>Zero cost. Give it 2 virtual NICs. Best place to start.</td></tr>
+<tr><td>Mini-PC w/ 2–4 Intel NICs (e.g. fanless N100/N5105 box)</td><td>Real home/small-office use</td><td>~$150–250, silent, low power. The sweet spot.</td></tr>
+<tr><td>Old desktop + a second NIC card</td><td>Free hardware reuse</td><td>Power-hungry but great for learning on real metal.</td></tr>
+<tr><td>Deciso DEC appliances</td><td>Production / business</td><td>Vendor hardware, supports the project.</td></tr>
+</tbody></table>
+<h4>Minimum specs (more than enough for home)</h4>
+<ul>
+<li>Dual-core x86-64 CPU (AES-NI support strongly recommended for VPN crypto)</li>
+<li>4 GB RAM (8 GB if you'll run Suricata IDS + plugins)</li>
+<li>16+ GB SSD</li>
+<li>Intel NICs preferred — they "just work" on BSD; some Realtek chips are finicky.</li>
+</ul>
+<div class="callout tip"><span class="ci">💡</span><b>Start in a VM today.</b> You can build the entire skill set in VirtualBox before spending a cent. Create one VM for OPNsense (2 NICs: one bridged = WAN, one internal-network = LAN) and a second "client" VM on that internal network to test against.</div>
+`,
+        quiz:[
+          {q:"The minimum number of network interfaces a real firewall needs is…",opts:["1","2","3","4"],a:1,ex:"WAN + LAN = two interfaces minimum, so the firewall actually sits between two separate networks."},
+          {q:"OPNsense is built on…",opts:["Debian Linux","HardenedBSD (a FreeBSD fork)","Windows Server","Arch Linux"],a:1,ex:"OPNsense runs on HardenedBSD, a security-hardened FreeBSD derivative."},
+          {q:"Which CPU feature most helps VPN performance?",opts:["Hyper-threading","AES-NI hardware crypto","Overclocking","More cache"],a:1,ex:"AES-NI accelerates the encryption VPNs rely on, dramatically improving throughput."},
+          {q:"Best NIC brand for trouble-free BSD support?",opts:["Realtek","Intel","Broadcom","Whatever's cheapest"],a:1,ex:"Intel NICs have the most mature BSD driver support; some Realtek chips are problematic."}
+        ]
+      },
+      {
+        t:"Install & first boot walkthrough",
+        sub:"The actual click-by-click first run.",
+        html:`
+<p>The process is the same on metal or in a VM. Here's the full path from download to login.</p>
+<h3>1. Get the image</h3>
+<ul>
+<li>Download the <b>DVD (ISO)</b> image for a VM, or the <b>VGA (USB/img)</b> image to write to a USB stick for bare metal, from <a href="https://opnsense.org/download/" target="_blank">opnsense.org/download</a>.</li>
+<li>For USB, write it with <b>balenaEtcher</b> (cross-platform, foolproof) or <code>dd</code> on Linux/Mac.</li>
+</ul>
+<h3>2. Boot the installer</h3>
+<p>Boot from the media. It auto-logs into a live environment. At the login prompt:</p>
+<pre><code><span class="tok-c"># login to start the installer</span>
+login: installer
+password: opnsense</code></pre>
+<p>Follow the guided installer: choose keymap → select <b>ZFS</b> (modern, supports snapshots) → pick your target disk → confirm. It copies the system, then asks you to set a root password and reboot. Remove the install media.</p>
+<div class="callout warn"><span class="ci">⚠️</span><b>The target disk gets wiped.</b> Triple-check you selected the right disk, especially on a machine with multiple drives.</div>
+<h3>3. Interface assignment — the one step people fumble</h3>
+<p>On first boot OPNsense asks which physical NIC is WAN and which is LAN. If you're unsure which is which, the trick is:</p>
+<ol>
+<li>When asked to assign interfaces, decline auto-assignment.</li>
+<li>Unplug all network cables.</li>
+<li>Plug in <b>one</b> cable and let it auto-detect that link — assign it (e.g. WAN).</li>
+<li>Repeat for the LAN cable.</li>
+</ol>
+<p>By default OPNsense sets: <b>WAN</b> = DHCP client (gets an address from your ISP), <b>LAN</b> = <code>192.168.1.1/24</code> with a DHCP server handing out addresses to your devices.</p>
+<h3>4. First login to the web UI</h3>
+<ul>
+<li>Connect a computer to the LAN side. It should receive an IP like <code>192.168.1.100</code>.</li>
+<li>Browse to <code>https://192.168.1.1</code> (accept the self-signed cert warning — it's expected).</li>
+<li>Log in as <code>root</code> with the password you set.</li>
+<li>Run the <b>Setup Wizard</b>: set hostname, DNS, timezone, and — importantly — <b>change the root password</b> and confirm the WAN/LAN config.</li>
+</ul>
+<div class="callout tip"><span class="ci">💡</span><b>Conflicting subnets gotcha:</b> if your ISP router also uses <code>192.168.1.x</code>, you'll get a routing conflict. Change the OPNsense LAN to something uncommon like <code>192.168.10.1/24</code> during the wizard to avoid headaches.</div>
+<div class="callout note"><span class="ci">🔎</span><b>Console menu:</b> the physical console (or SSH) gives you a numbered menu — option 1 reassigns interfaces, option 2 sets IPs, option 4 resets to factory, option 11 restarts the web UI if you ever lock yourself out. Memorize option 4; it's your undo button.</div>
+`,
+        quiz:[
+          {q:"Default installer credentials are…",opts:["root / root","installer / opnsense","admin / admin","opnsense / opnsense"],a:1,ex:"Log in as installer / opnsense to launch the guided installer."},
+          {q:"By default, the LAN interface is configured as…",opts:["A DHCP client","192.168.1.1/24 with a DHCP server","Disabled","The same as WAN"],a:1,ex:"LAN defaults to 192.168.1.1/24 and runs a DHCP server for your devices; WAN is a DHCP client."},
+          {q:"If your ISP router already uses 192.168.1.x, you should…",opts:["Do nothing","Change the OPNsense LAN to a different subnet like 192.168.10.1/24","Disable the WAN","Use the same subnet on purpose"],a:1,ex:"Overlapping subnets break routing; pick a distinct LAN subnet."},
+          {q:"Which console menu option resets OPNsense to factory defaults (your 'undo')?",opts:["Option 1","Option 2","Option 4","Option 11"],a:2,ex:"Option 4 is factory reset — invaluable when you've locked yourself out with a bad rule."}
+        ]
+      }
+    ]
+  },
+
+  /* ===================== MODULE 3 ===================== */
+  {
+    id:"m3", icon:"🛡️", level:2, levelName:"Core Skills",
+    title:"Rules, NAT & VPN",
+    subtitle:"The daily-driver skills of running a firewall",
+    lessons:[
+      {
+        t:"Writing firewall rules that actually work",
+        sub:"Interfaces, rule order, aliases, and the anatomy of a rule.",
+        html:`
+<p>In OPNsense rules live under <span class="gui-path">Firewall<span>›</span>Rules</span>, organized per interface tab (WAN, LAN, and any others). Two facts to internalize:</p>
+<ul>
+<li><b>Rules are evaluated on the interface where traffic ENTERS the firewall.</b> Traffic from your laptop to the internet hits the <b>LAN</b> rules first, not WAN. This trips up everyone at first.</li>
+<li><b>First match wins, top to bottom</b> — exactly as in Module 1.</li>
+</ul>
+<h3>Anatomy of a rule</h3>
+<table class="tbl"><thead><tr><th>Field</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>Action</td><td>Pass, Block (silent drop), or Reject (drop + tell sender)</td></tr>
+<tr><td>Interface</td><td>Where the traffic enters</td></tr>
+<tr><td>Direction</td><td>Usually "in" (default)</td></tr>
+<tr><td>Protocol</td><td>TCP, UDP, TCP/UDP, ICMP…</td></tr>
+<tr><td>Source</td><td>Where it's from (a host, subnet, alias, or "any")</td></tr>
+<tr><td>Destination + port</td><td>Where it's going and which service</td></tr>
+</tbody></table>
+<div class="callout note"><span class="ci">🔎</span><b>Block vs. Reject:</b> <b>Block</b> silently drops the packet — the sender just sees a timeout. <b>Reject</b> sends back a "connection refused." On WAN-facing rules, prefer <b>Block</b> — silence gives attackers less information. On internal rules, <b>Reject</b> is friendlier because apps fail fast instead of hanging.</div>
+<h3>The default LAN rule</h3>
+<p>Out of the box, LAN has a "default allow LAN to any" rule — that's why you can browse immediately. As you mature, you'll replace this permissive rule with tighter, purpose-built ones (default-deny, Module 1).</p>
+<h3>Aliases — the pro's secret to maintainable rulesets</h3>
+<p>An <b>alias</b> (<span class="gui-path">Firewall<span>›</span>Aliases</span>) is a named container for IPs, networks, ports, or even auto-updating URL lists. Instead of writing the same IP in 12 rules, you reference an alias once. Change the alias, every rule updates.</p>
+<pre><code><span class="tok-c"># Example aliases</span>
+<span class="tok-k">Servers</span>      = 192.168.10.10, 192.168.10.11
+<span class="tok-k">AdminPorts</span>   = 22, 443, 3389
+<span class="tok-k">BlocklistURL</span> = https://.../badips.txt  <span class="tok-c"># auto-refreshes</span></code></pre>
+<p>Now a rule reads "Block source <code>BlocklistURL</code> to any" and stays current automatically.</p>
+<div class="callout pro"><span class="ci">🎯</span><b>Pro habit:</b> never hard-code an IP or port into more than one rule. Aliases turn a sprawling, error-prone ruleset into something readable and auditable — exactly what reviewers and future-you want.</div>
+<h3>A worked example: let only specific devices reach the internet</h3>
+<ol>
+<li>Create alias <code>TrustedDevices</code> = your laptop + phone IPs.</li>
+<li>On the LAN tab, rule 1: <b>Pass</b> source <code>TrustedDevices</code> → destination any.</li>
+<li>Rule 2 (below it): <b>Block</b> source any → destination any.</li>
+</ol>
+<p>First-match means trusted devices pass on rule 1; everything else falls through to the block. That's default-deny in three clicks.</p>
+`,
+        quiz:[
+          {q:"Traffic from your LAN laptop to the internet is first evaluated by rules on which interface?",opts:["WAN","LAN","Both simultaneously","Neither"],a:1,ex:"Rules apply where traffic ENTERS the firewall. Outbound traffic enters via LAN, so LAN rules apply first."},
+          {q:"On a WAN-facing rule, which action reveals the least to an attacker?",opts:["Reject","Block (silent drop)","Pass","Log"],a:1,ex:"Block silently drops — the attacker just sees a timeout. Reject confirms something is there."},
+          {q:"The main benefit of an alias is…",opts:["Faster packet processing","One named object referenced by many rules, updated in one place","Encryption","Bypassing rule order"],a:1,ex:"Aliases centralize IPs/ports/lists so rulesets stay maintainable and auditable."},
+          {q:"To implement default-deny on LAN, the BLOCK any→any rule should be…",opts:["Above the allow rules","Below the specific allow rules","On the WAN tab","Disabled"],a:1,ex:"Specific allows go on top; the catch-all block sits at the bottom so only intended traffic passes."}
+        ]
+      },
+      {
+        t:"Port forwarding & NAT in practice",
+        sub:"Exposing a service safely — and the traps that bite people.",
+        html:`
+<p>Port forwarding (destination NAT) lets someone on the internet reach a server inside your LAN — a game server, a self-hosted app, etc. In OPNsense it lives under <span class="gui-path">Firewall<span>›</span>NAT<span>›</span>Port Forward</span>.</p>
+<h3>How a port forward works</h3>
+<p>You define: "Traffic arriving on WAN, destination port X, should be redirected to internal host Y on port Z." OPNsense can <b>auto-create the matching firewall rule</b> for you (a checkbox in the form) — leave that on while learning.</p>
+<pre><code><span class="tok-c"># Example: expose a web app running on an internal box</span>
+Interface:        WAN
+Protocol:         TCP
+Destination:      WAN address
+Dest port:        8443
+Redirect target:  192.168.10.20
+Redirect port:    443
+Filter rule:      [x] Add associated filter rule</code></pre>
+<div class="callout warn"><span class="ci">⚠️</span><b>Every port forward is an attack surface.</b> You've opened a door from the entire internet to an internal machine. Before forwarding, ask: does this <i>need</i> to be internet-facing, or would a VPN (next lesson) be safer? For admin access (SSH, RDP, the OPNsense UI itself) the answer is almost always: <b>use a VPN, never a port forward.</b></div>
+<h3>Hardening a port forward you do need</h3>
+<ul>
+<li><b>Restrict the source.</b> If only your office should reach it, set the source to that IP/alias instead of "any."</li>
+<li><b>Use a non-default external port</b> to cut down on automated scanning noise (security-through-obscurity is a minor bonus, never your only layer).</li>
+<li><b>Put the exposed service in a DMZ/separate VLAN</b> (Module 4) so a breach doesn't reach your trusted LAN.</li>
+<li><b>Log the rule</b> and watch it.</li>
+</ul>
+<h3>NAT reflection (the "why can't I reach my server from inside?" bug)</h3>
+<p>Classic confusion: you forward a port, it works from outside, but from <i>inside</i> your LAN using the public IP it fails. That's because the traffic never leaves to hit WAN. The fix is <b>NAT reflection</b> (a.k.a. hairpin NAT), enabled per-rule or globally under <span class="gui-path">Firewall<span>›</span>Settings<span>›</span>Advanced</span>. Or better: use split-DNS so internal clients resolve the name to the internal IP directly.</p>
+<div class="callout tip"><span class="ci">💡</span><b>1:1 NAT vs port forward:</b> port forward maps a single port. <b>1:1 NAT</b> maps an entire public IP to an entire internal IP (all ports) — used when you have spare public IPs and a server that needs to be fully addressable. Rare in home setups, common in business.</div>
+`,
+        quiz:[
+          {q:"Port forwarding is an example of…",opts:["Source NAT","Destination NAT","No NAT","VPN"],a:1,ex:"Port forwarding rewrites the destination so external traffic reaches an internal host — destination NAT."},
+          {q:"For remote admin access (SSH, RDP, the firewall UI), the recommended approach is…",opts:["Port forward on a high port","A VPN, not a port forward","Expose it with no source restriction","Disable the firewall temporarily"],a:1,ex:"Admin interfaces should never be directly internet-exposed; tunnel in over a VPN instead."},
+          {q:"You can reach your forwarded server from outside but not from inside the LAN using the public IP. The cause is…",opts:["A broken cable","Missing NAT reflection (hairpin NAT) / split-DNS","The firewall is off","Wrong password"],a:1,ex:"Internal traffic never hits WAN; enable NAT reflection or use split-DNS to resolve to the internal IP."},
+          {q:"A strong way to reduce risk on a necessary port forward is…",opts:["Forward all ports just in case","Restrict the source to known IPs and isolate the host in a DMZ/VLAN","Use the default port","Turn off logging"],a:1,ex:"Limit who can connect and contain the exposed host so a breach can't pivot into your trusted LAN."}
+        ]
+      },
+      {
+        t:"VPNs with WireGuard",
+        sub:"Secure remote access done the modern way.",
+        html:`
+<p>A VPN gives you an encrypted tunnel into your network from anywhere — the safe alternative to port-forwarding admin services. OPNsense supports OpenVPN, IPsec, and <b>WireGuard</b>. WireGuard is the modern default: tiny codebase, very fast, dead-simple config, and OPNsense has had mature support for years.</p>
+<h3>How WireGuard thinks</h3>
+<p>Forget usernames and passwords. WireGuard is built on <b>key pairs</b>. Each peer (the server and each client) has a private key and a public key. A connection is allowed when two peers have exchanged public keys and agree on the <b>allowed IPs</b> each may use. That's the whole trust model.</p>
+<table class="tbl"><thead><tr><th>Concept</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>Local (Instance)</td><td>The WireGuard "server" on OPNsense — its keys, listen port (UDP 51820), and tunnel subnet (e.g. 10.10.10.1/24)</td></tr>
+<tr><td>Peer (Endpoint)</td><td>A client (your phone/laptop) — its public key and the tunnel IP it's allowed to use (e.g. 10.10.10.2/32)</td></tr>
+<tr><td>Allowed IPs</td><td>The networks a peer may send/receive through the tunnel. For full tunnel: 0.0.0.0/0</td></tr>
+</tbody></table>
+<h3>Setup at a glance (OPNsense 2026 UI)</h3>
+<ol>
+<li>Install the WireGuard plugin if needed (<span class="gui-path">System<span>›</span>Firmware<span>›</span>Plugins</span> → <code>os-wireguard</code>; it's built in on recent versions under <span class="gui-path">VPN<span>›</span>WireGuard</span>).</li>
+<li>Create an <b>Instance</b>: generate keys, set listen port 51820, tunnel address 10.10.10.1/24.</li>
+<li>Create a <b>Peer</b> for each device: paste the device's public key, set its allowed IP 10.10.10.2/32.</li>
+<li>Enable WireGuard and <b>assign it as an interface</b> (<span class="gui-path">Interfaces<span>›</span>Assignments</span>) so you can write firewall rules on it.</li>
+<li>On WAN, add a rule: <b>Pass</b> UDP to port 51820 (so clients can reach the tunnel).</li>
+<li>On the WireGuard interface, add rules controlling what connected clients can reach (default-deny applies here too!).</li>
+<li>Add an <b>outbound NAT</b> rule so tunnel traffic going to the internet is translated (for full-tunnel setups).</li>
+</ol>
+<div class="callout note"><span class="ci">🔎</span><b>Split tunnel vs. full tunnel.</b> <b>Split:</b> allowed IPs = just your LAN subnet (e.g. 192.168.10.0/24). Only traffic destined for home goes through the tunnel; normal browsing uses the client's local internet. <b>Full:</b> allowed IPs = 0.0.0.0/0. <i>All</i> client traffic routes through home — useful on untrusted public Wi-Fi.</div>
+<div class="callout warn"><span class="ci">⚠️</span><b>Don't skip the WireGuard-interface firewall rules.</b> A connected VPN client is now "inside." If you leave an allow-any rule, anyone who gets a peer config has full LAN access. Treat the VPN interface like any other: allow only what each peer needs.</div>
+<div class="callout pro"><span class="ci">🎯</span><b>Career relevance:</b> "remote access without exposing services" is a daily real-world requirement. Being able to explain WireGuard's key model, allowed-IPs scoping, and split vs. full tunnel cleanly is exactly the kind of practical knowledge that lands network/security roles.</div>
+`,
+        quiz:[
+          {q:"WireGuard authenticates peers using…",opts:["Usernames and passwords","Public/private key pairs","MAC addresses","One-time SMS codes"],a:1,ex:"Each peer has a keypair; trust is established by exchanging public keys and agreeing on allowed IPs."},
+          {q:"For a connecting client, 'Allowed IPs = 0.0.0.0/0' creates a…",opts:["Split tunnel","Full tunnel (all traffic routed through the VPN)","Blocked tunnel","DNS tunnel"],a:1,ex:"0.0.0.0/0 routes ALL client traffic through the tunnel — a full tunnel, handy on untrusted Wi-Fi."},
+          {q:"Which WAN rule must exist for clients to connect to WireGuard?",opts:["Pass TCP 443","Pass UDP to the WireGuard listen port (51820)","Block all UDP","Pass ICMP"],a:1,ex:"WireGuard listens on UDP 51820 by default; WAN must permit that so clients can reach it."},
+          {q:"Why must you still write firewall rules on the WireGuard interface?",opts:["For speed","Because a connected client is now 'inside' and default-deny should still scope its access","WireGuard requires it to start","To enable encryption"],a:1,ex:"VPN clients become internal; without rules they'd have unrestricted LAN access. Scope each peer."}
+        ]
+      }
+    ]
+  },
+
+  /* ===================== MODULE 4 ===================== */
+  {
+    id:"m4", icon:"🔬", level:3, levelName:"Advanced",
+    title:"IDS/IPS, Segmentation & Shaping",
+    subtitle:"Where a router becomes a real security platform",
+    lessons:[
+      {
+        t:"Intrusion detection & prevention with Suricata",
+        sub:"Watching the actual content of traffic for attack patterns.",
+        html:`
+<p>Firewall rules decide <i>who can talk to whom</i>. They don't inspect <i>what's being said</i>. That's the job of an <b>IDS/IPS</b>. OPNsense ships with <b>Suricata</b> under <span class="gui-path">Services<span>›</span>Intrusion Detection</span>.</p>
+<ul>
+<li><b>IDS</b> (detection) — watches traffic and <i>alerts</i> on suspicious patterns. Passive.</li>
+<li><b>IPS</b> (prevention) — same engine, but actively <i>drops</i> matching traffic. Active.</li>
+</ul>
+<h3>How Suricata decides what's bad: rules/signatures</h3>
+<p>Suricata matches traffic against <b>signature rulesets</b> — thousands of community-maintained patterns for known attacks, malware C2, exploit attempts, etc. The big free sets are <b>ET Open</b> (Emerging Threats) and Snort community rules; you enable and update them in the UI.</p>
+<pre><code><span class="tok-c"># A (simplified) Suricata signature reads like:</span>
+alert tcp any any -> any 445 (msg:"ETERNALBLUE SMB exploit attempt";
+  flow:to_server; content:"|FF|SMB"; ... sid:2024218;)</code></pre>
+<p>Each signature has an <b>SID</b> (unique ID), a message, and the content pattern that triggers it.</p>
+<h3>Inline IPS mode & the performance reality</h3>
+<p>To actually <i>block</i> (not just alert), enable <b>IPS mode</b>, which puts Suricata inline using netmap. Deep-inspecting every packet costs CPU — this is why the hardware lesson stressed a capable CPU and 8 GB RAM. On a small box, inspecting a gigabit line at full tilt can saturate the processor.</p>
+<div class="callout warn"><span class="ci">⚠️</span><b>False positives are the real challenge.</b> Turn on all rules in blocking mode and you <i>will</i> break legitimate traffic — a signature flags your video call, IPS drops it, users complain. Professional IDS/IPS work is mostly <b>tuning</b>: start in IDS (alert-only) mode, watch the alerts for a week, disable or tune noisy signatures, <i>then</i> move carefully to blocking.</div>
+<h3>The encryption problem</h3>
+<p>Most traffic is TLS-encrypted, so Suricata can't read the payload — it sees ciphertext. It can still inspect unencrypted metadata (SNI hostnames, JA3 TLS fingerprints, DNS, plain HTTP). Full payload inspection of HTTPS requires <b>TLS interception</b> (a proxy that decrypts, inspects, re-encrypts) which is invasive, breaks certificate pinning, and raises privacy/legal questions. Know it exists; deploy it carefully.</p>
+<div class="callout pro"><span class="ci">🎯</span><b>Interview gold:</b> being able to say "IDS first, tune the false positives, then enable IPS on the signatures I trust" demonstrates operational maturity. Anyone can flip a switch; pros understand the tuning lifecycle and the encryption blind spot.</div>
+`,
+        quiz:[
+          {q:"The difference between IDS and IPS is…",opts:["IDS encrypts, IPS doesn't","IDS alerts (passive); IPS actively blocks (inline)","IPS is older","They're identical"],a:1,ex:"Same detection engine; IDS only alerts, IPS sits inline and drops matching traffic."},
+          {q:"The biggest practical challenge running IPS in blocking mode is…",opts:["Disk space","False positives breaking legitimate traffic","Too few signatures","It can't be updated"],a:1,ex:"Untuned signatures drop real traffic. Start in alert mode, tune, then block selectively."},
+          {q:"Why can't Suricata read most HTTPS payloads?",opts:["It's too slow","The traffic is TLS-encrypted; it sees ciphertext unless you do TLS interception","HTTPS uses UDP","It only supports IPv4"],a:1,ex:"Encrypted payloads are opaque; only metadata (SNI, JA3, DNS) is visible without invasive TLS interception."},
+          {q:"The recommended rollout order for IPS is…",opts:["Enable all rules in blocking mode immediately","Start in IDS/alert mode, tune noisy signatures, then move to blocking","Block everything, then allow","Never use signatures"],a:1,ex:"Alert-first lets you find and tune false positives before they break production traffic."}
+        ]
+      },
+      {
+        t:"Network segmentation with VLANs",
+        sub:"Stop trusting your toaster. Contain the blast radius.",
+        html:`
+<p>A flat network — where every device can talk to every other device — means one compromised gadget (a cheap IoT camera, a guest's laptop) can reach everything, including your work machine and NAS. <b>Segmentation</b> splits the network into isolated zones so a breach is contained. The primary tool is the <b>VLAN</b>.</p>
+<h3>What a VLAN actually is</h3>
+<p>A <b>Virtual LAN</b> lets one physical network behave as several logically separate ones. Each VLAN gets an ID (a number 1–4094) tagged onto its Ethernet frames (the <b>802.1Q</b> standard). Devices in VLAN 20 can't see VLAN 30 unless the firewall explicitly routes and permits it.</p>
+<h3>A typical home/SMB segmentation plan</h3>
+<table class="tbl"><thead><tr><th>VLAN</th><th>Zone</th><th>Policy</th></tr></thead><tbody>
+<tr><td>10</td><td>Trusted (your computers)</td><td>Full access</td></tr>
+<tr><td>20</td><td>IoT (cameras, smart plugs)</td><td>Internet only; NO access to other VLANs</td></tr>
+<tr><td>30</td><td>Guest Wi-Fi</td><td>Internet only; isolated from everything internal</td></tr>
+<tr><td>40</td><td>Servers / DMZ</td><td>Tightly scoped; reachable only on specific ports</td></tr>
+</tbody></table>
+<h3>What it takes to deploy VLANs</h3>
+<ul>
+<li>A <b>managed switch</b> that supports 802.1Q (unmanaged switches can't tag VLANs).</li>
+<li>An <b>access point</b> that can map SSIDs to VLANs (so "Guest" Wi-Fi lands on VLAN 30).</li>
+<li>In OPNsense: create VLAN interfaces under <span class="gui-path">Interfaces<span>›</span>Other Types<span>›</span>VLAN</span>, assign each, give it a subnet + DHCP, then write inter-VLAN rules.</li>
+</ul>
+<h3>The rules that make segmentation real</h3>
+<p>Creating VLANs does nothing by itself — the isolation comes from rules. The key pattern for an isolated VLAN like IoT:</p>
+<ol>
+<li><b>Block</b> IoT → "This Firewall" admin ports (so devices can't attack OPNsense itself).</li>
+<li><b>Block</b> IoT → all other RFC1918 (private) ranges — this is the isolation rule.</li>
+<li><b>Pass</b> IoT → any (which now means only the internet, since private ranges are already blocked above).</li>
+</ol>
+<div class="callout tip"><span class="ci">💡</span><b>Build an "RFC1918" alias</b> containing 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16. Then "block IoT → RFC1918" is one clean rule that isolates the VLAN from every other internal network at once.</div>
+<div class="callout pro"><span class="ci">🎯</span><b>Why pros love segmentation:</b> it directly shrinks blast radius — the single most impactful architectural decision after default-deny. "Assume breach" is a core zero-trust principle, and VLANs are how you make a breach survivable.</div>
+`,
+        quiz:[
+          {q:"A VLAN provides isolation only when…",opts:["It's created","Firewall rules between VLANs enforce the policy","You restart the switch","DHCP is disabled"],a:1,ex:"VLANs alone just create separate subnets; the inter-VLAN firewall rules are what enforce isolation."},
+          {q:"To deploy VLANs you need a switch that supports…",opts:["PoE","802.1Q VLAN tagging (a managed switch)","Gigabit","Fiber"],a:1,ex:"802.1Q tagging requires a managed switch; unmanaged switches can't segment."},
+          {q:"The cleanest way to isolate an IoT VLAN from all internal networks is…",opts:["Block it from the internet","Block IoT → an RFC1918 alias, then allow IoT → any","Allow everything","Disable its DHCP"],a:1,ex:"Blocking the private (RFC1918) ranges first, then allowing 'any', leaves only internet access."},
+          {q:"Segmentation primarily improves security by…",opts:["Increasing speed","Reducing blast radius so one compromised device can't reach everything","Encrypting traffic","Hiding the SSID"],a:1,ex:"Containing a breach to one zone is the core value — an 'assume breach' / zero-trust principle."}
+        ]
+      },
+      {
+        t:"Traffic shaping, HA & reading the logs",
+        sub:"Performance control, resilience, and the visibility that ties it together.",
+        html:`
+<h3>Traffic shaping (QoS)</h3>
+<p>By default all traffic competes equally for bandwidth, so a big upload can wreck your video call's latency. <b>Traffic shaping</b> (<span class="gui-path">Firewall<span>›</span>Shaper</span>) lets you prioritize. The modern approach on OPNsense is the <b>FQ-CoDel</b> algorithm, which crushes <b>bufferbloat</b> — the latency spikes that happen when buffers overfill under load.</p>
+<ul>
+<li>Create <b>Pipes</b> = total bandwidth limits (e.g. set slightly below your real line speed so OPNsense, not the ISP, controls the queue).</li>
+<li>Create <b>Queues</b> with weights for prioritization.</li>
+<li>Create <b>Rules</b> matching traffic (e.g. VoIP, gaming) into the right queue.</li>
+</ul>
+<div class="callout tip"><span class="ci">💡</span><b>The single best shaping win for most people:</b> an FQ-CoDel pipe set to ~90–95% of your measured up/down speed. It almost eliminates bufferbloat and keeps interactive traffic snappy under load — measurable at dslreports/Waveform bufferbloat tests.</div>
+<h3>High availability (CARP)</h3>
+<p>For setups that can't go down, OPNsense supports <b>HA</b> with two firewalls using <b>CARP</b> (Common Address Redundancy Protocol). They share a virtual IP; one is master, one is backup. <b>pfsync</b> replicates the state table so existing connections survive a failover, and <b>XMLRPC sync</b> copies config changes from master to backup automatically. If the master dies, the backup takes the virtual IP within seconds. This is production/business territory, but knowing the CARP + pfsync + XMLRPC trio is standard senior-level knowledge.</p>
+<h3>Logs & monitoring — the skill that makes everything else useful</h3>
+<p>You cannot secure what you cannot see. Key surfaces:</p>
+<ul>
+<li><span class="gui-path">Firewall<span>›</span>Log Files<span>›</span>Live View</span> — real-time pass/block decisions. Filter by interface, IP, port. Your first stop when "something isn't connecting."</li>
+<li><span class="gui-path">Reporting<span>›</span>Insight</span> — traffic graphs over time; spot anomalies (a quiet IoT device suddenly uploading gigabytes = investigate).</li>
+<li><b>Suricata alerts</b> — the IDS view from the last module.</li>
+<li><b>Export to a SIEM:</b> ship logs via syslog to tools like Graylog, the ELK stack, or Wazuh for long-term analysis, correlation, and alerting. This is how real SOCs operate.</li>
+</ul>
+<div class="callout pro"><span class="ci">🎯</span><b>The pro mindset:</b> tools generate signals; humans need workflows to act on them. Set a habit — review blocked-inbound trends, watch for new outbound destinations, alert on IDS criticals. A firewall nobody watches is just expensive cable management.</div>
+<div class="callout note"><span class="ci">🔎</span><b>Troubleshooting reflex:</b> when traffic won't pass, open Live View and watch for the block. If you see it, the log tells you which rule/interface dropped it. If you <i>don't</i> see the packet at all, the problem is upstream (routing, DNS, the cable) — not your rules. This one habit will save you hours.</div>
+`,
+        quiz:[
+          {q:"FQ-CoDel is used to fight…",opts:["Malware","Bufferbloat (latency under load)","Weak passwords","DNS spoofing"],a:1,ex:"FQ-CoDel is a modern queue algorithm that keeps latency low under heavy load by managing buffers."},
+          {q:"In an OPNsense HA pair, what replicates the state table so connections survive failover?",opts:["CARP","pfsync","XMLRPC","DHCP"],a:1,ex:"CARP shares the virtual IP; pfsync replicates connection state; XMLRPC syncs config."},
+          {q:"You watch Live View and never see the packet you're troubleshooting. That suggests…",opts:["A rule is blocking it","The problem is upstream (routing/DNS/cabling), not your firewall rules","The firewall is off","Suricata dropped it"],a:1,ex:"No packet at the firewall means it isn't reaching OPNsense — look upstream rather than at your rules."},
+          {q:"Shipping firewall logs to Graylog/ELK/Wazuh gives you…",opts:["Faster internet","Long-term storage, correlation, and alerting like a real SOC","Automatic rule creation","More bandwidth"],a:1,ex:"A SIEM centralizes and correlates logs over time — the foundation of professional monitoring."}
+        ]
+      }
+    ]
+  },
+
+  /* ===================== MODULE 5 ===================== */
+  {
+    id:"m5", icon:"🚀", level:4, levelName:"Pro / Career",
+    title:"From Hobbyist to Professional",
+    subtitle:"Turning this knowledge into a security career",
+    lessons:[
+      {
+        t:"The security engineer's mental models",
+        sub:"How professionals think — beyond any single tool.",
+        html:`
+<p>Tools change; mental models last. These are the frameworks that working security engineers reason with daily, mapped to what you've already learned.</p>
+<h3>The CIA triad</h3>
+<p>Every security decision serves one of three goals:</p>
+<ul>
+<li><b>Confidentiality</b> — keep data secret (VPN encryption, TLS).</li>
+<li><b>Integrity</b> — keep data unaltered (signatures, checksums, IPS blocking tampering).</li>
+<li><b>Availability</b> — keep services up (HA/CARP, DDoS mitigation, traffic shaping).</li>
+</ul>
+<p>When you propose a control, name which leg it serves. It instantly frames the conversation in professional terms.</p>
+<h3>Zero Trust: "never trust, always verify"</h3>
+<p>The old model trusted everything "inside" the perimeter. Zero Trust assumes the network is already hostile — every request is authenticated and authorized regardless of origin. Your VLAN segmentation and per-interface default-deny rules are zero-trust principles in miniature: even an internal IoT device earns no trust by location.</p>
+<h3>Attacker's perspective: the kill chain</h3>
+<p>Defenders who think like attackers win. The <b>Cyber Kill Chain</b> (recon → weaponization → delivery → exploitation → installation → command-and-control → actions on objectives) maps where your controls intervene:</p>
+<table class="tbl"><thead><tr><th>Attacker stage</th><th>Your control</th></tr></thead><tbody>
+<tr><td>Recon / scanning</td><td>Default-deny WAN, silent Block, minimal exposure</td></tr>
+<tr><td>Delivery / exploit</td><td>IDS/IPS signatures (Suricata)</td></tr>
+<tr><td>Command & control</td><td>Outbound filtering, DNS monitoring, blocklists</td></tr>
+<tr><td>Lateral movement</td><td>VLAN segmentation</td></tr>
+<tr><td>Exfiltration</td><td>Egress rules, traffic anomaly alerts (Insight/SIEM)</td></tr>
+</tbody></table>
+<div class="callout pro"><span class="ci">🎯</span><b>The interview move:</b> when asked about a control, connect it to a kill-chain stage and a CIA goal. "Egress filtering disrupts command-and-control and protects confidentiality by stopping exfiltration." That's how a professional talks.</div>
+<h3>Egress filtering — the control most people skip</h3>
+<p>Everyone filters inbound. Few filter <b>outbound</b>. But malware needs to phone home — restricting what your network is allowed to <i>initiate</i> outward (instead of default-allow-out) catches compromise that perimeter rules miss entirely. It's tedious to maintain, which is exactly why it signals seriousness.</p>
+`,
+        quiz:[
+          {q:"VPN encryption primarily serves which CIA goal?",opts:["Confidentiality","Integrity","Availability","None"],a:0,ex:"Encryption keeps data secret in transit — confidentiality. (Integrity needs signatures/checksums; availability needs uptime controls.)"},
+          {q:"Zero Trust' is best summarized as…",opts:["Trust the internal network, distrust the internet","Never trust, always verify — regardless of network location","Trust nothing, allow nothing","Trust verified vendors only"],a:1,ex:"Zero Trust assumes the network is hostile and authenticates/authorizes every request by identity, not location."},
+          {q:"VLAN segmentation most directly disrupts which kill-chain stage?",opts:["Recon","Lateral movement","Weaponization","Delivery"],a:1,ex:"Segmentation contains an attacker to one zone, stopping lateral movement across the network."},
+          {q:"Egress (outbound) filtering is valuable because…",opts:["It speeds up the network","It can catch already-compromised hosts trying to phone home (C2/exfiltration)","It replaces inbound rules","It's required by NAT"],a:1,ex:"Most people only filter inbound; restricting outbound disrupts command-and-control and data exfiltration."}
+        ]
+      },
+      {
+        t:"Building a portfolio: home lab to hireable",
+        sub:"The concrete projects and certs that get you noticed.",
+        html:`
+<p>Knowledge gets you through the door; <b>demonstrated</b> knowledge gets you hired. Here's how to convert this curriculum into evidence.</p>
+<h3>Build a home lab that tells a story</h3>
+<p>Don't just run OPNsense — build a deliberately segmented, monitored network and <b>document it</b>. A strong lab includes:</p>
+<ul>
+<li>OPNsense with at least 3 VLANs (trusted / IoT / guest) and a written rule policy.</li>
+<li>WireGuard remote access with scoped peers.</li>
+<li>Suricata in IPS mode with a tuning log ("I disabled SID X because it false-positived on Y").</li>
+<li>Logs shipped to a SIEM (Wazuh or Graylog) with at least one custom alert.</li>
+<li>A diagram (draw.io) and a README explaining <i>why</i> each decision was made.</li>
+</ul>
+<div class="callout tip"><span class="ci">💡</span><b>The "why" is the differentiator.</b> Plenty of people can install software. A documented rationale — threat model, trade-offs, what you'd do with more budget — is what reads as <i>engineer</i> rather than <i>tinkerer</i>. Put it on GitHub.</div>
+<h3>Practice attacking your own lab</h3>
+<p>Spin up <b>Kali Linux</b> in a VM on your "guest" VLAN and try to reach the trusted VLAN. Watch your own IDS catch the nmap scan. Defenders who've sat in the attacker's chair write far better rules. Deliberately vulnerable targets like <b>Metasploitable</b> or <b>DVWA</b> give you something safe to probe.</p>
+<h3>Certifications, roughly in order</h3>
+<table class="tbl"><thead><tr><th>Cert</th><th>Focus</th><th>When</th></tr></thead><tbody>
+<tr><td>CompTIA Network+</td><td>Networking fundamentals</td><td>If the Module 1–2 material felt new</td></tr>
+<tr><td>CompTIA Security+</td><td>Broad security baseline</td><td>The common entry-level checkbox</td></tr>
+<tr><td>CCNA</td><td>Serious networking (Cisco)</td><td>If you want to go network-engineer deep</td></tr>
+<tr><td>Blue Team Level 1 (BTL1) / Security Blue Team</td><td>Hands-on defense, SOC skills</td><td>Practical, well-respected for defenders</td></tr>
+<tr><td>OSCP</td><td>Offensive / pentesting</td><td>Advanced, if you lean red-team</td></tr>
+</tbody></table>
+<div class="callout note"><span class="ci">🔎</span><b>Certs open doors; labs prove you can walk through them.</b> Most hiring managers weight a well-documented home lab and the ability to reason out loud about trade-offs above a wall of acronyms. Do both, but never skip the hands-on.</div>
+<h3>Roles this foundation feeds into</h3>
+<ul>
+<li><b>SOC Analyst</b> — live monitoring, alert triage (your logs/SIEM/IDS skills).</li>
+<li><b>Network/Security Engineer</b> — designing and running this infrastructure for real.</li>
+<li><b>Penetration Tester</b> — the offensive flip side (if you enjoyed attacking your lab).</li>
+<li><b>Security Architect</b> — the senior role that designs the layered systems you've been studying.</li>
+</ul>
+<div class="callout pro"><span class="ci">🎯</span><b>Your next concrete step:</b> stand up the VM lab from Module 2 this week, segment it, break it from Kali, document the whole thing on GitHub. That single project touches every concept in this course and becomes the centerpiece you talk about in interviews.</div>
+`,
+        quiz:[
+          {q:"What most separates a 'hireable engineer' lab from a 'tinkerer' lab?",opts:["More expensive hardware","Documented rationale: threat model, trade-offs, the 'why' behind each choice","Using only paid software","More VLANs than anyone needs"],a:1,ex:"Documenting why you made each decision demonstrates engineering judgment, not just installation ability."},
+          {q:"Practicing with Kali Linux against your own lab helps because…",opts:["It's required for OPNsense","Thinking like an attacker produces better defensive rules and lets you validate your IDS","It replaces certifications","It speeds up the network"],a:1,ex:"Sitting in the attacker's chair reveals gaps and lets you confirm detection actually works."},
+          {q:"The common entry-level security certification 'checkbox' is…",opts:["OSCP","CompTIA Security+","CISSP","CCIE"],a:1,ex:"Security+ is the broad, widely-requested entry-level baseline; OSCP/CISSP are advanced."},
+          {q:"Which role best matches live alert triage and monitoring?",opts:["SOC Analyst","Penetration Tester","Security Architect","Help Desk"],a:0,ex:"SOC analysts live in the logs/SIEM/IDS world — exactly the monitoring skills from Module 4."}
+        ]
+      }
+    ]
+  }
+];
+
+/* ===== Glossary ===== */
+const GLOSSARY = [
+  ["Firewall","","A checkpoint that allows or blocks network traffic based on an ordered ruleset."],
+  ["Stateful inspection","","Tracking active connections so return traffic is auto-permitted without explicit rules."],
+  ["State table","","The firewall's live record of open connections, used to match returning packets."],
+  ["Default-deny","","Block everything, then allow only what's explicitly needed (the professional posture)."],
+  ["Defense in depth","","Layering multiple independent controls so one failure isn't catastrophic."],
+  ["NAT","Network Address Translation","Rewriting IP addresses so many private hosts share one public IP."],
+  ["Source NAT","SNAT","Outbound NAT — rewrites the source address of traffic leaving your network."],
+  ["Destination NAT","DNAT","Port forwarding — redirects inbound traffic to an internal host."],
+  ["1:1 NAT","","Maps an entire public IP to an entire internal IP (all ports)."],
+  ["NAT reflection","Hairpin NAT","Lets internal clients reach a forwarded service via the public IP."],
+  ["Port forward","","A rule exposing a specific internal service to the internet."],
+  ["CIDR","Classless Inter-Domain Routing","Notation like /24 expressing how many bits are the network portion."],
+  ["RFC1918","","The private IP ranges: 10/8, 172.16/12, 192.168/16."],
+  ["WAN","Wide Area Network","The untrusted side — your internet/ISP connection."],
+  ["LAN","Local Area Network","The trusted side — your internal network."],
+  ["DMZ","Demilitarized Zone","A semi-trusted segment for internet-facing servers, isolated from the LAN."],
+  ["VLAN","Virtual LAN","Logically separate networks over shared physical hardware (802.1Q tagging)."],
+  ["802.1Q","","The standard for tagging Ethernet frames with a VLAN ID."],
+  ["Segmentation","","Splitting a network into isolated zones to contain breaches."],
+  ["Alias","","A named OPNsense object grouping IPs, networks, ports, or URL lists for reuse in rules."],
+  ["Block vs Reject","","Block silently drops; Reject drops and notifies the sender."],
+  ["IDS","Intrusion Detection System","Passively alerts on suspicious traffic patterns."],
+  ["IPS","Intrusion Prevention System","Actively blocks malicious traffic inline."],
+  ["Suricata","","The open-source IDS/IPS engine bundled with OPNsense."],
+  ["Signature / SID","","A pattern (with a unique ID) Suricata matches to detect known attacks."],
+  ["ET Open","Emerging Threats Open","A popular free community ruleset for Suricata."],
+  ["False positive","","Legitimate traffic wrongly flagged/blocked — the core IDS/IPS tuning challenge."],
+  ["TLS interception","","Decrypting HTTPS via proxy to inspect payloads; invasive and privacy-sensitive."],
+  ["JA3","","A fingerprint of a TLS client's handshake, usable even when payload is encrypted."],
+  ["WireGuard","","A modern, fast, key-based VPN protocol (UDP 51820 by default)."],
+  ["OpenVPN","","An older, flexible, widely-supported VPN protocol (often UDP 1194)."],
+  ["IPsec","","A standards-based VPN suite, common for site-to-site tunnels."],
+  ["Split tunnel","","VPN config where only specific subnets route through the tunnel."],
+  ["Full tunnel","","VPN config (Allowed IPs 0.0.0.0/0) routing all client traffic through the VPN."],
+  ["Allowed IPs","","In WireGuard, the networks a peer may send/receive through the tunnel."],
+  ["Traffic shaping","QoS","Prioritizing/limiting bandwidth so important traffic stays responsive."],
+  ["Bufferbloat","","Latency spikes caused by overfull network buffers under load."],
+  ["FQ-CoDel","","A modern queue algorithm that combats bufferbloat."],
+  ["CARP","Common Address Redundancy Protocol","Lets two firewalls share a virtual IP for high availability."],
+  ["pfsync","","Replicates the state table between HA firewalls so connections survive failover."],
+  ["XMLRPC sync","","Copies configuration from the master firewall to the backup in an HA pair."],
+  ["SIEM","Security Information and Event Management","Centralizes and correlates logs (Graylog, ELK, Wazuh) for analysis and alerting."],
+  ["Egress filtering","","Restricting outbound traffic to catch compromised hosts and exfiltration."],
+  ["CIA triad","","Confidentiality, Integrity, Availability — the three goals of security."],
+  ["Zero Trust","","'Never trust, always verify' — assume the network is hostile."],
+  ["Kill chain","","The stages of an attack, from recon to actions on objectives."],
+  ["Lateral movement","","An attacker spreading from one compromised host to others."],
+  ["AES-NI","","CPU instructions that accelerate AES encryption (boosts VPN throughput)."],
+  ["HardenedBSD","","The security-focused FreeBSD fork OPNsense is built on."]
+];
+
+/* ============================================================
+   ENGINE
+============================================================ */
+const STORE_KEY = "fw_academy_progress_v1";
+let state = loadState();
+
+function loadState(){
+  try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {done:{},scores:{}}; }
+  catch(e){ return {done:{},scores:{}}; }
+}
+function saveState(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
+
+/* flat list of lessons for navigation */
+const FLAT = [];
+CURRICULUM.forEach((m,mi)=> m.lessons.forEach((l,li)=> FLAT.push({mi,li,key:m.id+"_"+li})));
+
+let view = {type:"home"}; // home | lesson | glossary
+
+function lessonKey(mi,li){ return CURRICULUM[mi].id+"_"+li; }
+function isDone(mi,li){ return !!state.done[lessonKey(mi,li)]; }
+function totalLessons(){ return FLAT.length; }
+function doneCount(){ return FLAT.filter(f=>state.done[f.key]).length; }
+
+function moduleProgress(mi){
+  const m=CURRICULUM[mi];
+  const d=m.lessons.filter((_,li)=>isDone(mi,li)).length;
+  return {d,total:m.lessons.length,pct:Math.round(d/m.lessons.length*100)};
+}
+
+/* ---------- Render sidebar ---------- */
+function renderNav(){
+  const nav=document.getElementById('navList');
+  nav.innerHTML='';
+  CURRICULUM.forEach((m,mi)=>{
+    const p=moduleProgress(mi);
+    const el=document.createElement('div');
+    el.className='modlink'+(view.type==='lesson'&&view.mi===mi?' active':'');
+    el.innerHTML=`<div class="ico">${m.icon}</div>
+      <div class="meta"><span class="t">${m.title}</span><span class="s">${p.d}/${p.total} lessons · L${m.level}</span></div>
+      <div class="check ${p.pct===100?'done':''}">${p.pct===100?'✓':''}</div>`;
+    el.onclick=()=>{ openLesson(mi,firstUndone(mi)); };
+    nav.appendChild(el);
+  });
+  // progress bar
+  const pct = Math.round(doneCount()/totalLessons()*100);
+  document.getElementById('progBar').style.width=pct+'%';
+  document.getElementById('progPct').textContent=pct+'%';
+  // glossary active
+  document.getElementById('glossLink').classList.toggle('active',view.type==='glossary');
+}
+function firstUndone(mi){
+  const m=CURRICULUM[mi];
+  for(let li=0;li<m.lessons.length;li++) if(!isDone(mi,li)) return li;
+  return 0;
+}
+
+/* ---------- Views ---------- */
+function openHome(){ view={type:'home'}; render(); }
+function openLesson(mi,li){ view={type:'lesson',mi,li}; window.scrollTo(0,0); render(); }
+function openGlossary(){ view={type:'glossary'}; window.scrollTo(0,0); render(); }
+
+const LVLCLASS={1:'lvl-1',2:'lvl-2',3:'lvl-3',4:'lvl-4'};
+
+function render(){
+  renderNav();
+  const c=document.getElementById('content');
+  const crumb=document.getElementById('crumb');
+  const pill=document.getElementById('lvlPill');
+  if(view.type==='home'){ pill.style.display='none'; crumb.innerHTML='<b>Home</b>'; c.innerHTML=homeHTML(); bindHome(); }
+  else if(view.type==='glossary'){ pill.style.display='none'; crumb.innerHTML='<b>Glossary</b>'; c.innerHTML=glossaryHTML(); bindGlossary(); }
+  else { renderLesson(); }
+}
+
+function homeHTML(){
+  const pct=Math.round(doneCount()/totalLessons()*100);
+  let cards=CURRICULUM.map((m,mi)=>{
+    const p=moduleProgress(mi);
+    return `<div class="track-card" data-mi="${mi}">
+      <div class="n">${mi+1}</div>
+      <div class="badge ${LVLCLASS[m.level]}">Level ${m.level} · ${m.levelName}</div>
+      <h3>${m.icon} ${m.title}</h3>
+      <p>${m.subtitle}</p>
+      <div class="mini"><i style="width:${p.pct}%"></i></div>
+    </div>`;
+  }).join('');
+  const resume = pct>0 && pct<100;
+  return `<div class="hero">
+    <h2>Firewall Academy</h2>
+    <p class="lead">A hands-on path from "what's a firewall?" to security-engineer thinking — built around <b>OPNsense</b>, the leading open-source firewall. Five modules, 12 lessons, ${FLAT.reduce((a,f)=>a+CURRICULUM[f.mi].lessons[f.li].quiz.length,0)} quiz questions. Your progress saves automatically.</p>
+    ${pct===100?'<div class="completed-banner">🎓 <b>Course complete.</b> Every module finished. Time to build the lab from Module 5 and put it on GitHub.</div>':''}
+    <button class="btn" id="startBtn">${pct===0?'Start Module 1':(resume?'Resume where you left off':'Review the course')}</button>
+    <div class="nav-section" style="margin-left:0">The curriculum</div>
+    <div class="track-grid">${cards}</div>
+  </div>`;
+}
+function bindHome(){
+  document.querySelectorAll('.track-card').forEach(el=>{
+    el.onclick=()=>{ const mi=+el.dataset.mi; openLesson(mi,firstUndone(mi)); };
+  });
+  document.getElementById('startBtn').onclick=()=>{
+    // resume: first global undone
+    for(const f of FLAT){ if(!state.done[f.key]){ openLesson(f.mi,f.li); return; } }
+    openLesson(0,0);
+  };
+}
+
+function renderLesson(){
+  const {mi,li}=view; const m=CURRICULUM[mi]; const l=m.lessons[li];
+  const pill=document.getElementById('lvlPill');
+  pill.style.display='inline-block';
+  pill.className='pill '+LVLCLASS[m.level];
+  pill.textContent='Level '+m.level+' · '+m.levelName;
+  document.getElementById('crumb').innerHTML=`${m.icon} ${m.title} &nbsp;›&nbsp; <b>${l.t}</b> &nbsp;<span style="color:var(--mut2)">(${li+1}/${m.lessons.length})</span>`;
+
+  const c=document.getElementById('content');
+  const done=isDone(mi,li);
+  c.innerHTML=`
+    ${done?'<div class="completed-banner">✓ <b>Lesson complete.</b> You can revisit anytime — your quiz score is saved.</div>':''}
+    <h2 class="lesson-t">${l.t}</h2>
+    <p class="lesson-sub">${l.sub}</p>
+    ${l.html}
+    <div id="quizMount"></div>
+    <div class="nav-foot" id="navFoot"></div>
+  `;
+  mountQuiz(mi,li);
+  mountFoot(mi,li);
+}
+
+/* ---------- Quiz ---------- */
+function mountQuiz(mi,li){
+  const l=CURRICULUM[mi].lessons[li];
+  const mount=document.getElementById('quizMount');
+  const key=lessonKey(mi,li);
+  const saved=state.scores[key]; // {answers:[], submitted:true}
+  let answers = saved? saved.answers.slice() : new Array(l.quiz.length).fill(-1);
+  let submitted = saved? true : false;
+
+  function draw(){
+    let qhtml=l.quiz.map((q,qi)=>{
+      const opts=q.opts.map((o,oi)=>{
+        let cls='opt';
+        if(answers[qi]===oi) cls+=' sel';
+        if(submitted){
+          if(oi===q.a) cls+=' correct';
+          else if(answers[qi]===oi) cls+=' wrong';
+        }
+        let mk = submitted ? (oi===q.a?'<span class="mk">✓</span>':(answers[qi]===oi?'<span class="mk">✕</span>':'')) : '';
+        return `<div class="${cls}" data-qi="${qi}" data-oi="${oi}">${o}${mk}</div>`;
+      }).join('');
+      const exp = submitted? `<div class="explain show">${answers[qi]===q.a?'✓ Correct. ':'Answer: '}${q.ex}</div>`:'';
+      return `<div class="q"><div class="qt"><span>Q${qi+1}</span>${q.q}</div>${opts}${exp}</div>`;
+    }).join('');
+
+    const answered = answers.every(a=>a>=0);
+    let actions;
+    if(submitted){
+      const correct=l.quiz.filter((q,qi)=>answers[qi]===q.a).length;
+      const pass=correct===l.quiz.length;
+      actions=`<div class="score" style="color:${pass?'var(--green)':'var(--amber)'}">Score: ${correct}/${l.quiz.length} ${pass?'· Perfect 🎉':'· review the misses above'}</div>
+        <button class="btn ghost" id="retryBtn">Try again</button>`;
+    } else {
+      actions=`<button class="btn" id="submitBtn" ${answered?'':'disabled'}>Submit answers</button>
+        <span style="font-size:12px;color:var(--mut)">${answers.filter(a=>a>=0).length}/${l.quiz.length} answered</span>`;
+    }
+
+    mount.innerHTML=`<div class="quiz">
+      <h3>Check yourself</h3>
+      <p class="qsub">Answer all ${l.quiz.length} to complete this lesson.</p>
+      ${qhtml}
+      <div class="quiz-actions">${actions}</div>
+    </div>`;
+
+    mount.querySelectorAll('.opt').forEach(o=>{
+      o.onclick=()=>{
+        if(submitted) return;
+        const qi=+o.dataset.qi, oi=+o.dataset.oi;
+        answers[qi]=oi; draw();
+      };
+    });
+    const sb=document.getElementById('submitBtn');
+    if(sb) sb.onclick=()=>{
+      submitted=true;
+      const correct=l.quiz.filter((q,qi)=>answers[qi]===q.a).length;
+      state.scores[key]={answers:answers.slice(),correct,total:l.quiz.length};
+      state.done[key]=true;
+      saveState(); renderNav(); draw(); mountFoot(mi,li);
+    };
+    const rb=document.getElementById('retryBtn');
+    if(rb) rb.onclick=()=>{ submitted=false; answers=new Array(l.quiz.length).fill(-1); draw(); };
+  }
+  draw();
+}
+
+/* ---------- Footer nav ---------- */
+function mountFoot(mi,li){
+  const foot=document.getElementById('navFoot');
+  if(!foot) return;
+  // compute prev/next across modules
+  const idx=FLAT.findIndex(f=>f.mi===mi&&f.li===li);
+  const prev=idx>0?FLAT[idx-1]:null;
+  const next=idx<FLAT.length-1?FLAT[idx+1]:null;
+  const pl=prev?CURRICULUM[prev.mi].lessons[prev.li].t:'';
+  const nl=next?CURRICULUM[next.mi].lessons[next.li].t:'';
+  foot.innerHTML=`
+    <button ${prev?'':'disabled'} id="prevBtn"><div class="d">← Previous</div><div class="t">${pl||'Start of course'}</div></button>
+    <button class="next" ${next?'':'disabled'} id="nextBtn"><div class="d">Next →</div><div class="t">${nl||'You\'re at the end 🎓'}</div></button>`;
+  if(prev) document.getElementById('prevBtn').onclick=()=>openLesson(prev.mi,prev.li);
+  if(next) document.getElementById('nextBtn').onclick=()=>openLesson(next.mi,next.li);
+}
+
+/* ---------- Glossary ---------- */
+function glossaryHTML(){
+  const terms=GLOSSARY.slice().sort((a,b)=>a[0].localeCompare(b[0]));
+  const items=terms.map(t=>`<div class="gterm" data-s="${(t[0]+' '+t[1]+' '+t[2]).toLowerCase()}">
+    <b>${t[0]}</b>${t[1]?`<span class="ab">${t[1]}</span>`:''}<p>${t[2]}</p></div>`).join('');
+  return `<h2 class="lesson-t">Glossary</h2>
+    <p class="lesson-sub">${GLOSSARY.length} terms used across the course. Search to filter.</p>
+    <input class="gloss-search" id="gsearch" placeholder="Search terms… (e.g. NAT, VLAN, WireGuard)">
+    <div id="glist">${items}</div>`;
+}
+function bindGlossary(){
+  const s=document.getElementById('gsearch');
+  s.oninput=()=>{
+    const q=s.value.toLowerCase().trim();
+    document.querySelectorAll('.gterm').forEach(el=>{
+      el.style.display = !q || el.dataset.s.includes(q) ? '' : 'none';
+    });
+  };
+}
+
+/* ---------- Wire up chrome ---------- */
+document.getElementById('glossLink').onclick=openGlossary;
+document.querySelector('.brand').style.cursor='pointer';
+document.querySelector('.brand').onclick=openHome;
+document.getElementById('resetBtn').onclick=()=>{
+  if(confirm('Reset all progress and quiz scores? This cannot be undone.')){
+    state={done:{},scores:{}}; saveState(); openHome();
+  }
+};
+
+render();
+</script>
+</body>
+</html>
