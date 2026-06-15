@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MobileCaster Beginner Tutorial</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f5f5f3;
+  --color-background-tertiary: #eeede8;
+  --color-text-primary: #1a1a18;
+  --color-text-secondary: #5f5e5a;
+  --color-text-tertiary: #888780;
+  --color-border-tertiary: rgba(0,0,0,0.12);
+  --color-border-secondary: rgba(0,0,0,0.2);
+  --color-border-primary: rgba(0,0,0,0.3);
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background-primary: #1e1e1c;
+    --color-background-secondary: #2a2a28;
+    --color-background-tertiary: #141412;
+    --color-text-primary: #f0ede4;
+    --color-text-secondary: #a8a7a0;
+    --color-text-tertiary: #6b6a66;
+    --color-border-tertiary: rgba(255,255,255,0.1);
+    --color-border-secondary: rgba(255,255,255,0.18);
+  }
+}
+body { font-family: var(--font-sans); font-size: 15px; color: var(--color-text-primary); background: var(--color-background-tertiary); min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 24px 16px; }
+.app-wrap { width: 100%; max-width: 960px; }
+.app-title { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.app { display: flex; height: 640px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; background: var(--color-background-primary); box-shadow: 0 2px 16px rgba(0,0,0,0.06); }
+.sidebar { width: 220px; min-width: 220px; border-right: 0.5px solid var(--color-border-tertiary); overflow-y: auto; background: var(--color-background-secondary); display: flex; flex-direction: column; }
+.sidebar-header { padding: 14px 14px 10px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.sidebar-header h1 { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+.nav-section { padding: 8px 0; }
+.nav-label { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); padding: 6px 14px 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+.nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 14px; cursor: pointer; font-size: 13px; color: var(--color-text-secondary); border-left: 2px solid transparent; transition: background 0.1s; }
+.nav-item:hover { background: var(--color-background-primary); color: var(--color-text-primary); }
+.nav-item.active { background: var(--color-background-primary); color: var(--color-text-primary); border-left-color: #534AB7; font-weight: 500; }
+.nav-item i { font-size: 15px; }
+.main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+.content { flex: 1; padding: 24px 28px; }
+.page { display: none; }
+.page.active { display: block; }
+h2 { font-size: 18px; font-weight: 500; margin-bottom: 6px; }
+h3 { font-size: 15px; font-weight: 500; margin: 18px 0 8px; }
+.subtitle { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 20px; line-height: 1.5; }
+.cards-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+.cards-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 16px 0; }
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 14px 16px; }
+.card-accent { border-left: 3px solid #534AB7; }
+.card-green { border-left: 3px solid #3B6D11; }
+.card-amber { border-left: 3px solid #854F0B; }
+.card-coral { border-left: 3px solid #993C1D; }
+.card h4 { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.card p { font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; }
+.flow { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 16px 0; }
+.flow-box { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 7px 12px; font-size: 12px; font-weight: 500; }
+.flow-arrow { color: var(--color-text-tertiary); font-size: 16px; }
+.badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 99px; margin-right: 4px; }
+.badge-purple { background: #EEEDFE; color: #3C3489; }
+.badge-teal { background: #E1F5EE; color: #085041; }
+.badge-amber { background: #FAEEDA; color: #633806; }
+.badge-coral { background: #FAECE7; color: #712B13; }
+.code-block { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 14px 16px; font-family: var(--font-mono); font-size: 12px; line-height: 1.7; overflow-x: auto; margin: 10px 0; color: var(--color-text-secondary); }
+.code-block .kw { color: #534AB7; font-weight: 500; }
+.code-block .str { color: #0F6E56; }
+.code-block .cm { color: var(--color-text-tertiary); }
+.code-block .fn { color: #854F0B; }
+.code-block .num { color: #993C1D; }
+.lab-box { border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-lg); overflow: hidden; margin: 16px 0; }
+.lab-header { background: var(--color-background-secondary); padding: 10px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.lab-header span { font-size: 13px; font-weight: 500; }
+.lab-body { padding: 16px; }
+.editor-area { width: 100%; min-height: 120px; font-family: var(--font-mono); font-size: 12px; line-height: 1.7; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 12px; color: var(--color-text-primary); resize: vertical; }
+.editor-area:focus { outline: none; border-color: #534AB7; }
+.check-btn { margin-top: 10px; background: #0F6E56; color: #E1F5EE; border: none; border-radius: var(--border-radius-md); padding: 7px 16px; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.check-btn:hover { background: #085041; }
+.output-box { background: #2C2C2A; color: #D3D1C7; font-family: var(--font-mono); font-size: 12px; border-radius: var(--border-radius-md); padding: 12px; margin-top: 10px; min-height: 48px; line-height: 1.6; white-space: pre-wrap; }
+.output-ok { color: #5DCAA5; }
+.output-err { color: #F09595; }
+.checklist { list-style: none; margin: 10px 0; }
+.checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; font-size: 13px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.checklist li:last-child { border-bottom: none; }
+.chk { width: 18px; height: 18px; min-width: 18px; border: 0.5px solid var(--color-border-secondary); border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; background: var(--color-background-secondary); }
+.chk.done { background: #E1F5EE; border-color: #0F6E56; color: #0F6E56; }
+.progress-bar { background: var(--color-background-secondary); border-radius: 99px; height: 6px; margin: 8px 0 4px; overflow: hidden; }
+.progress-fill { background: #534AB7; height: 100%; border-radius: 99px; transition: width 0.3s; }
+.progress-label { font-size: 12px; color: var(--color-text-secondary); }
+.table-wrap { overflow-x: auto; margin: 12px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { font-weight: 500; text-align: left; padding: 8px 12px; border-bottom: 0.5px solid var(--color-border-secondary); font-size: 12px; color: var(--color-text-secondary); }
+td { padding: 8px 12px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+tr:last-child td { border-bottom: none; }
+.sim-area { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 16px; margin: 12px 0; }
+.sim-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.sim-row label { font-size: 13px; color: var(--color-text-secondary); min-width: 110px; }
+.sim-row input[type=range] { flex: 1; }
+.sim-row span { font-size: 13px; font-weight: 500; min-width: 80px; }
+.sim-result { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 12px; }
+.sim-result-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 13px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.sim-result-row:last-child { border-bottom: none; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+.dot-green { background: #1D9E75; }
+.dot-amber { background: #EF9F27; }
+.dot-red { background: #E24B4A; }
+.dot-purple { background: #7F77DD; }
+.week-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+.week-card { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 12px; }
+.week-card .week-num { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.week-card h4 { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+.week-card ul { list-style: none; font-size: 12px; color: var(--color-text-secondary); line-height: 1.7; }
+.week-card ul li::before { content: "·  "; }
+.tab-bar { display: flex; gap: 4px; margin-bottom: 16px; background: var(--color-background-secondary); padding: 4px; border-radius: var(--border-radius-md); }
+.tab-btn { flex: 1; padding: 6px 10px; font-size: 12px; font-weight: 500; border: none; background: transparent; cursor: pointer; border-radius: 6px; color: var(--color-text-secondary); }
+.tab-btn.active { background: var(--color-background-primary); color: var(--color-text-primary); border: 0.5px solid var(--color-border-tertiary); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+code { font-family: var(--font-mono); font-size: 12px; background: var(--color-background-secondary); padding: 1px 5px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="app-wrap">
+  <div class="app-title">
+    <i class="ti ti-player-play"></i>
+    FirmVision Technologies — MobileCaster Beginner Tutorial
+  </div>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="sidebar-header"><h1>MobileCaster</h1></div>
+      <div class="nav-section">
+        <div class="nav-label">Overview</div>
+        <div class="nav-item active" onclick="goto('home',this)"><i class="ti ti-player-play"></i> Getting started</div>
+        <div class="nav-item" onclick="goto('concepts',this)"><i class="ti ti-bulb"></i> Core concepts</div>
+        <div class="nav-item" onclick="goto('languages',this)"><i class="ti ti-code"></i> Languages &amp; tools</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Part A — Android</div>
+        <div class="nav-item" onclick="goto('android-arch',this)"><i class="ti ti-device-mobile"></i> Architecture</div>
+        <div class="nav-item" onclick="goto('android-lab',this)"><i class="ti ti-flask"></i> Lab: Kotlin basics</div>
+        <div class="nav-item" onclick="goto('android-adaptive',this)"><i class="ti ti-adjustments"></i> Adaptive bitrate</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Part B — iOS</div>
+        <div class="nav-item" onclick="goto('ios-arch',this)"><i class="ti ti-brand-apple"></i> Architecture</div>
+        <div class="nav-item" onclick="goto('ios-lab',this)"><i class="ti ti-flask"></i> Lab: Swift basics</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Part C — Labs</div>
+        <div class="nav-item" onclick="goto('lab-sim',this)"><i class="ti ti-chart-line"></i> Bitrate simulator</div>
+        <div class="nav-item" onclick="goto('lab-obs',this)"><i class="ti ti-broadcast"></i> OBS setup guide</div>
+        <div class="nav-item" onclick="goto('lab-errors',this)"><i class="ti ti-bug"></i> Common errors</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Progress</div>
+        <div class="nav-item" onclick="goto('roadmap',this)"><i class="ti ti-map"></i> 7-week roadmap</div>
+        <div class="nav-item" onclick="goto('checklist',this)"><i class="ti ti-checkbox"></i> Readiness checklist</div>
+      </div>
+    </nav>
+    <main class="main">
+      <div class="content">
+
+        <!-- HOME -->
+        <div id="page-home" class="page active">
+          <h2>MobileCaster beginner tutorial</h2>
+          <p class="subtitle">Build a Larix-style live broadcaster for Android and iPhone from scratch. This interactive guide takes you from zero to a working streaming app.</p>
+          <div class="flow">
+            <div class="flow-box">📱 Phone camera + mic</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box">App preview</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box">HW encoder</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box">SRT / RTMP</div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-box">OBS / YouTube</div>
+          </div>
+          <div class="cards-2">
+            <div class="card card-accent"><h4>🤖 Android app</h4><p>Kotlin · RootEncoder · Foreground service · Thermal &amp; network monitoring · Adaptive bitrate · SRT/RTMP</p></div>
+            <div class="card card-green"><h4>🍎 iOS app</h4><p>Swift · SwiftUI · HaishinKit · NWPathMonitor · ProcessInfo thermal · SRT to OBS · RTMPS to YouTube</p></div>
+          </div>
+          <h3>Four layers of the app</h3>
+          <div class="cards-2">
+            <div class="card"><h4>UI layer</h4><p>User enters stream URL, presses Start/Stop, sees status</p></div>
+            <div class="card"><h4>Streaming engine</h4><p>Captures camera + mic, encodes video/audio, sends to OBS or platform</p></div>
+            <div class="card"><h4>Monitoring layer</h4><p>Watches heat and network, tells engine to raise/lower bitrate</p></div>
+            <div class="card"><h4>Platform layer</h4><p>Android foreground service or iOS lifecycle — keeps streaming stable</p></div>
+          </div>
+          <p style="font-size:13px;color:var(--color-text-secondary);margin-top:16px;">Use the sidebar to navigate each module. Labs have interactive code editors — type and run code right here.</p>
+        </div>
+
+        <!-- CONCEPTS -->
+        <div id="page-concepts" class="page">
+          <h2>Core livestreaming concepts</h2>
+          <p class="subtitle">Understand these terms before touching any code.</p>
+          <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab('concepts','video',this)">Video</button>
+            <button class="tab-btn" onclick="switchTab('concepts','audio',this)">Audio</button>
+            <button class="tab-btn" onclick="switchTab('concepts','protocols',this)">Protocols</button>
+          </div>
+          <div id="concepts-video" class="tab-panel active">
+            <h3>Resolution &amp; FPS</h3>
+            <div class="table-wrap"><table>
+              <tr><th>Quality</th><th>Resolution</th><th>Bitrate</th><th>FPS</th></tr>
+              <tr><td>720p</td><td>1280 × 720</td><td>2.5–4 Mbps</td><td>30</td></tr>
+              <tr><td>1080p</td><td>1920 × 1080</td><td>4.5–6 Mbps</td><td>30</td></tr>
+              <tr><td>4K</td><td>3840 × 2160</td><td>12+ Mbps</td><td>30–60</td></tr>
+            </table></div>
+            <p style="font-size:13px;color:var(--color-text-secondary);">Beginner tip: start with 720p 30fps at 2.5 Mbps — most stable and compatible.</p>
+            <h3>Video codecs</h3>
+            <div class="cards-2">
+              <div class="card card-accent"><h4>H.264</h4><p>Safest and most compatible. Works with every platform. Use this first.</p></div>
+              <div class="card"><h4>H.265 / HEVC</h4><p>Smaller file size, but less supported. Better for high-res streams later.</p></div>
+            </div>
+          </div>
+          <div id="concepts-audio" class="tab-panel">
+            <h3>Audio codecs</h3>
+            <div class="cards-2">
+              <div class="card card-accent"><h4>AAC</h4><p>Standard for RTMP/RTMPS. Use for YouTube, Facebook, Twitch.</p></div>
+              <div class="card"><h4>Opus</h4><p>Used in WebRTC and some SRT workflows. More efficient at low bitrates.</p></div>
+            </div>
+            <h3>Audio settings</h3>
+            <div class="code-block">Sample rate: <span class="num">44100</span> Hz  (CD quality)<br>Stereo:      <span class="kw">true</span><br>Bitrate:     <span class="num">128000</span> bps (128 kbps)</div>
+          </div>
+          <div id="concepts-protocols" class="tab-panel">
+            <h3>Streaming protocols</h3>
+            <div class="table-wrap"><table>
+              <tr><th>Protocol</th><th>Best for</th><th>Latency</th></tr>
+              <tr><td><span class="badge badge-purple">RTMP</span></td><td>YouTube, Facebook, Twitch</td><td>2–5 sec</td></tr>
+              <tr><td><span class="badge badge-teal">SRT</span></td><td>Phone → OBS direct, unstable network</td><td>0.2–1 sec</td></tr>
+              <tr><td><span class="badge badge-amber">RTSP</span></td><td>Camera / security workflows</td><td>1–3 sec</td></tr>
+              <tr><td><span class="badge badge-coral">WebRTC</span></td><td>Ultra-low latency apps</td><td>&lt;0.5 sec</td></tr>
+            </table></div>
+            <div class="cards-2">
+              <div class="card card-accent"><h4>Phone → OBS (best path)</h4><p><code>srt://COMPUTER_IP:9999?mode=caller</code></p></div>
+              <div class="card card-green"><h4>Phone → YouTube (best path)</h4><p><code>rtmps://a.rtmps.youtube.com/live2/KEY</code></p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LANGUAGES -->
+        <div id="page-languages" class="page">
+          <h2>Languages &amp; tools you need</h2>
+          <p class="subtitle">Skills needed for each platform. Learn Android first — easier to debug foreground streaming behavior.</p>
+          <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab('lang','android',this)">Android</button>
+            <button class="tab-btn" onclick="switchTab('lang','ios',this)">iOS</button>
+            <button class="tab-btn" onclick="switchTab('lang','general',this)">General</button>
+          </div>
+          <div id="lang-android" class="tab-panel active">
+            <div class="table-wrap"><table>
+              <tr><th>Skill</th><th>Why you need it</th></tr>
+              <tr><td><strong>Kotlin</strong></td><td>Main language for the Android app</td></tr>
+              <tr><td>XML</td><td>Android layouts and manifest</td></tr>
+              <tr><td>Gradle / Kotlin DSL</td><td>Build config and dependencies</td></tr>
+              <tr><td>Android Studio</td><td>IDE for writing, testing, building</td></tr>
+              <tr><td>Android lifecycle</td><td>Activity, Service, permissions, states</td></tr>
+              <tr><td>Foreground services</td><td>Keep streaming alive while app is active</td></tr>
+              <tr><td>Networking basics</td><td>RTMP/SRT URLs, IP, ports, OBS</td></tr>
+            </table></div>
+          </div>
+          <div id="lang-ios" class="tab-panel">
+            <div class="table-wrap"><table>
+              <tr><th>Skill</th><th>Why you need it</th></tr>
+              <tr><td><strong>Swift</strong></td><td>Main language for the iPhone app</td></tr>
+              <tr><td>SwiftUI</td><td>Build the iOS interface</td></tr>
+              <tr><td>Xcode</td><td>IDE for iOS development</td></tr>
+              <tr><td>Swift Package Manager</td><td>Install HaishinKit</td></tr>
+              <tr><td>AVFoundation</td><td>Camera and microphone handling</td></tr>
+              <tr><td>iOS permissions</td><td>Camera, mic, local network access</td></tr>
+              <tr><td>Network framework</td><td>NWPathMonitor — Wi-Fi/mobile status</td></tr>
+            </table></div>
+          </div>
+          <div id="lang-general" class="tab-panel">
+            <div class="table-wrap"><table>
+              <tr><th>Skill</th><th>Why it matters</th></tr>
+              <tr><td>Git / GitHub</td><td>Save code versions</td></tr>
+              <tr><td>OBS Studio</td><td>Test live camera input</td></tr>
+              <tr><td>Basic IP networking</td><td>LAN IP, ports, firewall, SRT modes</td></tr>
+              <tr><td>Video basics</td><td>Resolution, FPS, bitrate, codec, latency</td></tr>
+              <tr><td>Debugging</td><td>Read errors, logcat, crash reports</td></tr>
+            </table></div>
+          </div>
+        </div>
+
+        <!-- ANDROID ARCH -->
+        <div id="page-android-arch" class="page">
+          <h2>Android architecture</h2>
+          <p class="subtitle">The app is split into clear layers so the stream survives screen rotations and lifecycle events.</p>
+          <h3>Project structure</h3>
+          <div class="code-block">mobilecaster/<br>  app/src/main/<br>    AndroidManifest.xml<br>    java/com/firmvision/mobilecaster/<br>      <span class="kw">MainActivity.kt</span>      <span class="cm">← user interface</span><br>      <span class="fn">StreamingService.kt</span>  <span class="cm">← streaming engine</span><br>      <span class="str">AdaptivePolicy.kt</span>   <span class="cm">← bitrate logic</span><br>      NetworkMonitor.kt    <span class="cm">← watch Wi-Fi/mobile</span><br>      ThermalMonitor.kt    <span class="cm">← watch phone heat</span><br>    res/layout/activity_main.xml</div>
+          <h3>Activity vs Service — why it matters</h3>
+          <div class="cards-2">
+            <div class="card card-coral"><h4>❌ Bad: everything in MainActivity</h4><p>Stream dies on screen rotation, app background, or orientation change. Beginner mistake.</p></div>
+            <div class="card card-green"><h4>✅ Good: split approach</h4><p>MainActivity = UI only. StreamingService = engine. The stream survives because the service keeps running.</p></div>
+          </div>
+          <h3>Required permissions (AndroidManifest.xml)</h3>
+          <div class="code-block"><span class="cm">&lt;!-- Camera + microphone --&gt;</span><br>&lt;uses-permission android:name=<span class="str">"android.permission.CAMERA"</span> /&gt;<br>&lt;uses-permission android:name=<span class="str">"android.permission.RECORD_AUDIO"</span> /&gt;<br>&lt;uses-permission android:name=<span class="str">"android.permission.INTERNET"</span> /&gt;<br>&lt;uses-permission android:name=<span class="str">"android.permission.FOREGROUND_SERVICE"</span> /&gt;<br>&lt;uses-permission android:name=<span class="str">"android.permission.FOREGROUND_SERVICE_CAMERA"</span> /&gt;</div>
+        </div>
+
+        <!-- ANDROID LAB -->
+        <div id="page-android-lab" class="page">
+          <h2>Lab: Kotlin basics</h2>
+          <p class="subtitle">Run these exercises in order. Each one teaches a concept used in the real MobileCaster Android app.</p>
+          <div class="lab-box">
+            <div class="lab-header"><i class="ti ti-number-1"></i><span>Exercise 1 — Variables</span><span class="badge badge-purple" style="margin-left:auto">Beginner</span></div>
+            <div class="lab-body">
+              <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px;">Fix the code: <code>val</code> means fixed, <code>var</code> means changeable. The bitrate should be changeable, the resolution should be fixed.</p>
+              <textarea class="editor-area" id="kt1" spellcheck="false">// Change `val` to `var` for bitrate, keep `val` for resolution
+val bitrate = 2500000
+val resolution = "1280x720"
+
+// Try to change bitrate here:
+bitrate = 4000000</textarea>
+              <button class="check-btn" onclick="checkKt1()"><i class="ti ti-check"></i> Check answer</button>
+              <div class="output-box" id="out-kt1">Output will appear here...</div>
+            </div>
+          </div>
+          <div class="lab-box">
+            <div class="lab-header"><i class="ti ti-number-2"></i><span>Exercise 2 — Functions</span><span class="badge badge-purple" style="margin-left:auto">Beginner</span></div>
+            <div class="lab-body">
+              <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px;">Complete the <code>startStream</code> function so it prints the URL.</p>
+              <textarea class="editor-area" id="kt2" spellcheck="false">fun startStream(url: String) {
+    // Your code here: print "Starting stream to [url]"
+    
+}
+
+// This should call your function:
+startStream("srt://192.168.1.50:9999")</textarea>
+              <button class="check-btn" onclick="checkKt2()"><i class="ti ti-check"></i> Check answer</button>
+              <div class="output-box" id="out-kt2">Output will appear here...</div>
+            </div>
+          </div>
+          <div class="lab-box">
+            <div class="lab-header"><i class="ti ti-number-3"></i><span>Exercise 3 — AdaptivePolicy class</span><span class="badge badge-amber" style="margin-left:auto">Intermediate</span></div>
+            <div class="lab-body">
+              <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px;">Complete the <code>nextBitrate</code> function. If <code>weakNetwork</code> is true, return 75% of current. If <code>hotPhone</code> is true, return 60%. Otherwise return 110%.</p>
+              <textarea class="editor-area" id="kt3" spellcheck="false">class AdaptivePolicy {
+    val minBitrate = 800000
+    val maxBitrate = 4000000
+
+    fun nextBitrate(current: Int, weakNetwork: Boolean, hotPhone: Boolean): Int {
+        return when {
+            hotPhone -> // 60% of current, min minBitrate
+            weakNetwork -> // 75% of current, min minBitrate
+            else -> // 110% of current, max maxBitrate
+        }
+    }
+}
+
+val policy = AdaptivePolicy()
+println(policy.nextBitrate(2500000, false, false))
+println(policy.nextBitrate(2500000, true, false))
+println(policy.nextBitrate(2500000, false, true))</textarea>
+              <button class="check-btn" onclick="checkKt3()"><i class="ti ti-check"></i> Check answer</button>
+              <div class="output-box" id="out-kt3">Output will appear here...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ANDROID ADAPTIVE -->
+        <div id="page-android-adaptive" class="page">
+          <h2>Adaptive bitrate logic</h2>
+          <p class="subtitle">The app watches heat and network, then automatically adjusts bitrate to keep streaming stable.</p>
+          <h3>The policy</h3>
+          <div class="code-block"><span class="kw">class</span> <span class="fn">AdaptivePolicy</span> {<br>&nbsp;&nbsp;<span class="kw">private val</span> minBitrate = <span class="num">800_000</span><br>&nbsp;&nbsp;<span class="kw">private val</span> maxBitrate = <span class="num">4_000_000</span><br><br>&nbsp;&nbsp;<span class="kw">fun</span> <span class="fn">nextBitrate</span>(current: Int, weakNetwork: Boolean, hotPhone: Boolean): Int {<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">return when</span> {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hotPhone → (current * <span class="num">0.6</span>).toInt().<span class="fn">coerceAtLeast</span>(minBitrate)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;weakNetwork → (current * <span class="num">0.75</span>).toInt().<span class="fn">coerceAtLeast</span>(minBitrate)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">else</span> → (current * <span class="num">1.1</span>).toInt().<span class="fn">coerceAtMost</span>(maxBitrate)<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;}<br>}</div>
+          <h3>Thermal states</h3>
+          <div class="cards-3">
+            <div class="card card-green"><h4><span class="status-dot dot-green"></span>Normal</h4><p>Full bitrate. All systems go.</p></div>
+            <div class="card card-amber"><h4><span class="status-dot dot-amber"></span>Moderate</h4><p>Reduce bitrate slightly. Watch closely.</p></div>
+            <div class="card card-coral"><h4><span class="status-dot dot-red"></span>Severe</h4><p>Force bitrate to 1.2 Mbps. Protect the phone.</p></div>
+          </div>
+        </div>
+
+        <!-- IOS ARCH -->
+        <div id="page-ios-arch" class="page">
+          <h2>iOS architecture</h2>
+          <p class="subtitle">The iOS app uses SwiftUI + HaishinKit. Key difference from Android: iOS has no foreground service — keep the screen awake.</p>
+          <h3>Project structure</h3>
+          <div class="code-block">MobileCasterIOS/<br>  Sources/<br>    <span class="kw">MobileCasterIOSApp.swift</span>  <span class="cm">← entry point</span><br>    <span class="kw">ContentView.swift</span>         <span class="cm">← main SwiftUI screen</span><br>    <span class="fn">StreamManager.swift</span>       <span class="cm">← streaming engine</span><br>    <span class="str">AdaptivePolicy.swift</span>      <span class="cm">← bitrate adjustments</span><br>    StreamPreviewView.swift   <span class="cm">← camera preview</span><br>    NetworkMonitor.swift      <span class="cm">← NWPathMonitor</span><br>    ThermalMonitor.swift      <span class="cm">← ProcessInfo.thermalState</span></div>
+          <h3>iOS permissions (Info.plist)</h3>
+          <div class="code-block">&lt;<span class="kw">key</span>&gt;NSCameraUsageDescription&lt;/key&gt;<br>&lt;string&gt;<span class="str">Camera is required for live streaming.</span>&lt;/string&gt;<br><br>&lt;<span class="kw">key</span>&gt;NSMicrophoneUsageDescription&lt;/key&gt;<br>&lt;string&gt;<span class="str">Microphone is required for live audio.</span>&lt;/string&gt;<br><br>&lt;<span class="kw">key</span>&gt;NSLocalNetworkUsageDescription&lt;/key&gt;<br>&lt;string&gt;<span class="str">Used to stream to OBS on your LAN.</span>&lt;/string&gt;</div>
+          <div class="card card-amber" style="margin-top:16px;"><h4>⚠️ Critical iOS limitation</h4><p>iOS has no foreground service. For reliable streaming: keep the app open, keep screen awake, plug into power. iOS may suspend camera when app is backgrounded.</p></div>
+        </div>
+
+        <!-- IOS LAB -->
+        <div id="page-ios-lab" class="page">
+          <h2>Lab: Swift basics</h2>
+          <p class="subtitle">Practice the Swift patterns used in the real MobileCaster iOS app.</p>
+          <div class="lab-box">
+            <div class="lab-header"><i class="ti ti-number-1"></i><span>Exercise 1 — let vs var</span><span class="badge badge-purple" style="margin-left:auto">Beginner</span></div>
+            <div class="lab-body">
+              <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px;">In Swift, <code>let</code> is fixed, <code>var</code> is changeable. Fix the code below.</p>
+              <textarea class="editor-area" id="sw1" spellcheck="false">// Width should be fixed (let), bitrate should change (var)
+var width = 1280
+let bitrate = 2_500_000
+
+// This should work:
+bitrate = 4_000_000</textarea>
+              <button class="check-btn" onclick="checkSw1()"><i class="ti ti-check"></i> Check answer</button>
+              <div class="output-box" id="out-sw1">Output will appear here...</div>
+            </div>
+          </div>
+          <div class="lab-box">
+            <div class="lab-header"><i class="ti ti-number-2"></i><span>Exercise 2 — SwiftUI ObservableObject</span><span class="badge badge-amber" style="margin-left:auto">Intermediate</span></div>
+            <div class="lab-body">
+              <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px;">The StreamManager class uses <code>@Published</code> so SwiftUI updates automatically. Identify what is wrong and fix it.</p>
+              <textarea class="editor-area" id="sw2" spellcheck="false">class StreamManager: ObservableObject {
+    // @Published missing — SwiftUI won't update!
+    var isStreaming = false
+    var status = "Idle"
+    
+    func startStream(url: String) {
+        isStreaming = true
+        status = "Streaming to \(url)"
+    }
+}</textarea>
+              <button class="check-btn" onclick="checkSw2()"><i class="ti ti-check"></i> Check answer</button>
+              <div class="output-box" id="out-sw2">Output will appear here...</div>
+            </div>
+          </div>
+          <div class="lab-box">
+            <div class="lab-header"><i class="ti ti-number-3"></i><span>Exercise 3 — Thermal state</span><span class="badge badge-amber" style="margin-left:auto">Intermediate</span></div>
+            <div class="lab-body">
+              <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px;">Complete the switch statement to handle all iOS thermal states.</p>
+              <textarea class="editor-area" id="sw3" spellcheck="false">func handleThermal(state: String) {
+    switch state {
+    case "nominal":
+        // normal bitrate
+    case "fair":
+        // getting warm — reduce slightly
+    case "serious":
+        // reduce bitrate now
+    case "critical":
+        // stop or heavily reduce
+    default:
+        break
+    }
+}
+
+handleThermal(state: "serious")</textarea>
+              <button class="check-btn" onclick="checkSw3()"><i class="ti ti-check"></i> Check answer</button>
+              <div class="output-box" id="out-sw3">Output will appear here...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BITRATE SIMULATOR -->
+        <div id="page-lab-sim" class="page">
+          <h2>Bitrate simulator</h2>
+          <p class="subtitle">Adjust conditions and see how the adaptive policy responds in real time.</p>
+          <div class="sim-area">
+            <div class="sim-row"><label>Current bitrate</label><input type="range" min="800" max="4000" step="100" value="2500" id="sl-bitrate" oninput="updateSim()"><span id="lbl-bitrate">2500 kbps</span></div>
+            <div class="sim-row"><label>Network quality</label><input type="range" min="0" max="2" step="1" value="2" id="sl-net" oninput="updateSim()"><span id="lbl-net">Good</span></div>
+            <div class="sim-row"><label>Phone heat</label><input type="range" min="0" max="3" step="1" value="0" id="sl-heat" oninput="updateSim()"><span id="lbl-heat">Normal</span></div>
+          </div>
+          <div class="sim-result">
+            <div class="sim-result-row"><span><span class="status-dot" id="dot-status"></span>Status</span><span id="res-status" style="font-weight:500;"></span></div>
+            <div class="sim-result-row"><span>Recommended bitrate</span><span id="res-bitrate" style="font-weight:500;"></span></div>
+            <div class="sim-result-row"><span>Change</span><span id="res-change" style="font-weight:500;"></span></div>
+            <div class="sim-result-row"><span>Action</span><span id="res-action" style="font-size:13px;color:var(--color-text-secondary);"></span></div>
+          </div>
+        </div>
+
+        <!-- OBS SETUP -->
+        <div id="page-lab-obs" class="page">
+          <h2>OBS setup guide</h2>
+          <p class="subtitle">Step-by-step to receive SRT from your phone in OBS Studio.</p>
+          <div class="lab-box">
+            <div class="lab-header"><i class="ti ti-number-1"></i><span>Find your computer IP</span></div>
+            <div class="lab-body">
+              <div class="cards-2">
+                <div class="card"><h4>Windows</h4><div class="code-block">ipconfig</div><p style="font-size:12px;margin-top:6px;">Look for "IPv4 Address" under your Wi-Fi adapter</p></div>
+                <div class="card"><h4>Mac / Linux</h4><div class="code-block">ifconfig | grep inet</div><p style="font-size:12px;margin-top:6px;">Look for 192.168.x.x or 10.x.x.x</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="lab-box">
+            <div class="lab-header"><i class="ti ti-number-2"></i><span>Add SRT Media Source in OBS</span></div>
+            <div class="lab-body">
+              <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:10px;">In OBS: Sources → + → Media Source → uncheck "Local File"</p>
+              <div class="code-block">srt://0.0.0.0:9999?mode=<span class="kw">listener</span>&amp;latency=200000</div>
+              <p style="font-size:12px;color:var(--color-text-secondary);margin-top:8px;">OBS is the <strong>listener</strong>. It waits for the phone to connect.</p>
+            </div>
+          </div>
+          <div class="lab-box">
+            <div class="lab-header"><i class="ti ti-number-3"></i><span>Set phone app URL</span></div>
+            <div class="lab-body">
+              <div class="code-block">srt://<span class="str">192.168.1.50</span>:9999?mode=<span class="fn">caller</span>&amp;latency=200000</div>
+              <p style="font-size:12px;color:var(--color-text-secondary);margin-top:8px;">Replace <code>192.168.1.50</code> with your actual computer IP. Phone is the <strong>caller</strong>.</p>
+            </div>
+          </div>
+          <div class="card card-accent" style="margin-top:8px;"><h4>The golden rule</h4><p>OBS = listener &nbsp;|&nbsp; Phone = caller &nbsp;|&nbsp; Same Wi-Fi &nbsp;|&nbsp; OBS starts listening first</p></div>
+        </div>
+
+        <!-- COMMON ERRORS -->
+        <div id="page-lab-errors" class="page">
+          <h2>Common errors &amp; fixes</h2>
+          <p class="subtitle">The most frequent issues beginners hit when building and testing MobileCaster.</p>
+          <div class="lab-box">
+            <div class="lab-header"><span class="status-dot dot-red"></span><span>OBS shows black screen</span></div>
+            <div class="lab-body"><ul style="font-size:13px;line-height:2;color:var(--color-text-secondary);list-style:none;"><li>✦ Phone and computer are on the same Wi-Fi network</li><li>✦ OBS firewall is allowed (Windows Firewall, macOS Firewall)</li><li>✦ Correct computer IP address used in phone app</li><li>✦ OBS is in listener mode before phone starts streaming</li><li>✦ No other app is using port 9999</li></ul></div>
+          </div>
+          <div class="lab-box">
+            <div class="lab-header"><span class="status-dot dot-amber"></span><span>Stream starts then stops</span></div>
+            <div class="lab-body"><ul style="font-size:13px;line-height:2;color:var(--color-text-secondary);list-style:none;"><li>✦ Weak Wi-Fi signal — move closer to router</li><li>✦ Bitrate too high for network — try 720p 2500 kbps</li><li>✦ Phone overheating — cool it down, reduce bitrate</li><li>✦ Firewall blocking UDP (SRT uses UDP)</li><li>✦ Wrong SRT mode — check caller vs listener</li></ul><div class="code-block" style="margin-top:10px;">Safe starting point: <span class="str">720p · 30fps · 2500 kbps</span></div></div>
+          </div>
+          <div class="lab-box">
+            <div class="lab-header"><span class="status-dot dot-purple"></span><span>YouTube / Facebook not working</span></div>
+            <div class="lab-body"><ul style="font-size:13px;line-height:2;color:var(--color-text-secondary);list-style:none;"><li>✦ Use <strong>RTMPS</strong>, not SRT or plain RTMP</li><li>✦ Stream key is correct and copied exactly</li><li>✦ Live event is created and set to "waiting for stream"</li><li>✦ Full URL is entered including the stream key</li></ul></div>
+          </div>
+          <div class="lab-box">
+            <div class="lab-header"><span class="status-dot dot-amber"></span><span>iPhone stream stops when screen locks</span></div>
+            <div class="lab-body"><p style="font-size:13px;color:var(--color-text-secondary);">This is expected behavior. iOS may suspend camera access when backgrounded.</p><ul style="font-size:13px;line-height:2;color:var(--color-text-secondary);list-style:none;margin-top:8px;"><li>✦ Keep the app open and visible</li><li>✦ Enable Screen Wake Lock in app settings</li><li>✦ Plug the phone into power for long events</li></ul></div>
+          </div>
+        </div>
+
+        <!-- ROADMAP -->
+        <div id="page-roadmap" class="page">
+          <h2>7-week build roadmap</h2>
+          <p class="subtitle">Do not try to learn everything at once. Follow this order — Android first, then iOS.</p>
+          <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab('roadmap','and',this)">Android (weeks 1–7)</button>
+            <button class="tab-btn" onclick="switchTab('roadmap','ios',this)">iOS (weeks 1–7)</button>
+          </div>
+          <div id="roadmap-and" class="tab-panel active">
+            <div class="week-grid">
+              <div class="week-card"><div class="week-num">Week 1</div><h4>Kotlin basics</h4><ul><li>Variables, functions, classes</li><li>if/else, lists, callbacks</li><li>Goal: read MainActivity.kt</li></ul></div>
+              <div class="week-card"><div class="week-num">Week 2</div><h4>Simple Android app</h4><ul><li>One screen, text field</li><li>Start + stop buttons</li><li>Goal: understand Activity</li></ul></div>
+              <div class="week-card"><div class="week-num">Week 3</div><h4>Permissions</h4><ul><li>Camera permission</li><li>Microphone permission</li><li>Goal: runtime permissions</li></ul></div>
+              <div class="week-card"><div class="week-num">Week 4</div><h4>Camera preview</h4><ul><li>Show phone camera in app</li><li>SurfaceView / TextureView</li><li>Goal: camera preview surface</li></ul></div>
+              <div class="week-card"><div class="week-num">Week 5</div><h4>Streaming library</h4><ul><li>Add RootEncoder</li><li>Stream camera to OBS via SRT</li><li>Goal: first live stream!</li></ul></div>
+              <div class="week-card"><div class="week-num">Week 6</div><h4>Foreground service</h4><ul><li>Move engine to Service</li><li>Add notification</li><li>Goal: stream survives rotation</li></ul></div>
+              <div class="week-card"><div class="week-num">Week 7</div><h4>Monitoring</h4><ul><li>NetworkCallback</li><li>ThermalStatusListener</li><li>Adaptive bitrate</li></ul></div>
+            </div>
+          </div>
+          <div id="roadmap-ios" class="tab-panel">
+            <div class="week-grid">
+              <div class="week-card"><div class="week-num">Week 1</div><h4>Swift basics</h4><ul><li>Variables, functions, classes</li><li>Structs, optionals, closures</li><li>Goal: read ContentView.swift</li></ul></div>
+              <div class="week-card"><div class="week-num">Week 2</div><h4>SwiftUI basics</h4><ul><li>Text field, picker</li><li>Start + stop buttons</li><li>Goal: basic SwiftUI screen</li></ul></div>
+              <div class="week-card"><div class="week-num">Week 3</div><h4>iOS permissions</h4><ul><li>Camera, mic, local network</li><li>Info.plist descriptions</li><li>Goal: permission flow</li></ul></div>
+              <div class="week-card"><div class="week-num">Week 4</div><h4>Camera preview</h4><ul><li>HaishinKit preview</li><li>AVFoundation preview</li><li>Goal: live camera in SwiftUI</li></ul></div>
+              <div class="week-card"><div class="week-num">Week 5</div><h4>RTMP stream</h4><ul><li>Stream to YouTube/Facebook</li><li>RTMPS URL + stream key</li><li>Goal: live on YouTube!</li></ul></div>
+              <div class="week-card"><div class="week-num">Week 6</div><h4>SRT stream</h4><ul><li>Stream directly to OBS</li><li>Caller/listener setup</li><li>Goal: phone → OBS via SRT</li></ul></div>
+              <div class="week-card"><div class="week-num">Week 7</div><h4>Monitoring</h4><ul><li>NWPathMonitor</li><li>ProcessInfo.thermalState</li><li>Adaptive bitrate policy</li></ul></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHECKLIST -->
+        <div id="page-checklist" class="page">
+          <h2>Readiness checklist</h2>
+          <p class="subtitle">Check off each item when you genuinely understand it. These are the minimum concepts to rebuild the apps.</p>
+          <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+          <p class="progress-label" id="prog-label">0 / 13 complete</p>
+          <ul class="checklist" id="checklist"></ul>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+const items=["What bitrate means","What resolution means","What FPS means","Difference between RTMP and SRT","How OBS receives SRT","How to find your computer IP address","How Android permissions work","How Android foreground service works","How iOS permissions work","Why iOS cannot behave exactly like Android foreground service","How to read app logs (logcat / Xcode console)","How to reduce bitrate when network is weak","How to reduce bitrate when phone is overheating"];
+const checked=new Set();
+function buildChecklist(){const ul=document.getElementById('checklist');items.forEach((item,i)=>{const li=document.createElement('li');li.innerHTML=`<div class="chk" id="chk${i}" onclick="toggleChk(${i})"></div><span>${item}</span>`;ul.appendChild(li)});}
+function toggleChk(i){const el=document.getElementById('chk'+i);if(checked.has(i)){checked.delete(i);el.classList.remove('done');el.textContent='';}else{checked.add(i);el.classList.add('done');el.textContent='✓';}const pct=Math.round(checked.size/items.length*100);document.getElementById('prog-fill').style.width=pct+'%';document.getElementById('prog-label').textContent=checked.size+' / '+items.length+' complete';}
+function goto(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));el.classList.add('active');if(id==='lab-sim')updateSim();}
+function switchTab(group,tab,btn){document.querySelectorAll('[id^="'+group+'-"]').forEach(p=>p.classList.remove('active'));document.getElementById(group+'-'+tab).classList.add('active');btn.parentElement.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+function updateSim(){const br=parseInt(document.getElementById('sl-bitrate').value);const net=parseInt(document.getElementById('sl-net').value);const heat=parseInt(document.getElementById('sl-heat').value);const netLabels=['Weak','Moderate','Good'];const heatLabels=['Normal','Warm','Severe','Critical'];document.getElementById('lbl-bitrate').textContent=br+' kbps';document.getElementById('lbl-net').textContent=netLabels[net];document.getElementById('lbl-heat').textContent=heatLabels[heat];const hotPhone=heat>=2;const weakNet=net<=0;let next,action,status,dotClass;const min=800,max=4000;if(heat>=3){next=Math.max(Math.round(br*0.5),min);action='Critical heat — cut by 50%';status='Critical';dotClass='dot-red';}else if(hotPhone){next=Math.max(Math.round(br*0.6),min);action='Phone hot — cut by 40%';status='Overheating';dotClass='dot-red';}else if(weakNet){next=Math.max(Math.round(br*0.75),min);action='Network weak — cut by 25%';status='Degraded';dotClass='dot-amber';}else if(net==1){next=Math.min(Math.round(br*1.05),max);action='Network moderate — hold or slight increase';status='Caution';dotClass='dot-amber';}else{next=Math.min(Math.round(br*1.1),max);action='All good — increase by 10%';status='Healthy';dotClass='dot-green';}const change=next-br;document.getElementById('res-status').textContent=status;document.getElementById('res-bitrate').textContent=next+' kbps';document.getElementById('res-change').textContent=(change>=0?'+':'')+change+' kbps';document.getElementById('res-change').style.color=change<0?'#E24B4A':change>0?'#1D9E75':'var(--color-text-secondary)';document.getElementById('res-action').textContent=action;const dot=document.getElementById('dot-status');dot.className='status-dot '+dotClass;}
+function checkKt1(){const code=document.getElementById('kt1').value;const out=document.getElementById('out-kt1');if(code.includes('var bitrate')&&code.includes('val resolution')){out.innerHTML='<span class="output-ok">✓ Correct! `var bitrate` means the bitrate can be changed. `val resolution` means it is fixed. This is exactly how MobileCaster declares streaming settings.</span>';}else if(code.includes('var bitrate')){out.innerHTML='<span class="output-ok">✓ Bitrate is correct (var). But check resolution — it should stay as `val` since you rarely change resolution mid-stream.</span>';}else{out.innerHTML='<span class="output-err">✗ Hint: bitrate needs to be `var` because the adaptive policy changes it at runtime. Resolution is fixed, so `val` is correct there.</span>';}}
+function checkKt2(){const code=document.getElementById('kt2').value;const out=document.getElementById('out-kt2');if((code.includes('println')||code.includes('print('))&&code.includes('url')){out.innerHTML='<span class="output-ok">✓ Correct! Your function should output:\nStarting stream to srt://192.168.1.50:9999\n\nIn the real app, this is where StreamingService.startStream() hands the URL to RootEncoder.</span>';}else{out.innerHTML='<span class="output-err">✗ Hint: add `println("Starting stream to $url")` inside the function body. The $ symbol inserts the url variable into the string.</span>';}}
+function checkKt3(){const code=document.getElementById('kt3').value;const out=document.getElementById('out-kt3');const hasHot=code.includes('0.6')||code.includes('60');const hasWeak=code.includes('0.75')||code.includes('75');const hasIncrease=code.includes('1.1')||code.includes('110');if(hasHot&&hasWeak&&hasIncrease){out.innerHTML='<span class="output-ok">✓ Correct! Expected output:\n2750000  (110% — network good)\n1875000  (75% — weak network)\n1500000  (60% — hot phone)\n\nThis is exactly the AdaptivePolicy logic in the real app.</span>';}else if(hasHot||hasWeak){out.innerHTML='<span class="output-ok">Partial — you have some cases right. Make sure all three: hotPhone → *0.6, weakNetwork → *0.75, else → *1.1.</span>';}else{out.innerHTML='<span class="output-err">✗ Fill in all three branches:\nhotPhone → (current * 0.6).toInt().coerceAtLeast(minBitrate)\nweakNetwork → (current * 0.75).toInt().coerceAtLeast(minBitrate)\nelse → (current * 1.1).toInt().coerceAtMost(maxBitrate)</span>';}}
+function checkSw1(){const code=document.getElementById('sw1').value;const out=document.getElementById('out-sw1');if(code.includes('let width')&&code.includes('var bitrate')){out.innerHTML='<span class="output-ok">✓ Correct! `let width` is fixed. `var bitrate` is changeable. Swift let/var works identically to Kotlin val/var.</span>';}else{out.innerHTML='<span class="output-err">✗ Hint: change `var width` to `let width` (fixed), and `let bitrate` to `var bitrate` (changeable).</span>';}}
+function checkSw2(){const code=document.getElementById('sw2').value;const out=document.getElementById('out-sw2');if(code.includes('@Published var isStreaming')&&code.includes('@Published var status')){out.innerHTML='<span class="output-ok">✓ Correct! Both @Published properties will now trigger SwiftUI to re-render when they change.</span>';}else if(code.includes('@Published')){out.innerHTML='<span class="output-ok">Partial — add @Published to both `isStreaming` and `status`.</span>';}else{out.innerHTML='<span class="output-err">✗ Add `@Published` before both `var isStreaming` and `var status`. Without it, SwiftUI never knows the values changed.</span>';}}
+function checkSw3(){const code=document.getElementById('sw3').value;const out=document.getElementById('out-sw3');const hasAll=['nominal','fair','serious','critical'].every(s=>code.includes(s));const hasAction=code.includes('print')||code.includes('reduce')||code.includes('bitrate')||code.includes('Reduce')||code.includes('stop')||code.includes('Stop');if(hasAll&&hasAction){out.innerHTML='<span class="output-ok">✓ Correct! All four thermal states handled. In the real app each case calls the adaptive policy to set a new bitrate target.</span>';}else if(hasAll){out.innerHTML='<span class="output-ok">All cases present — add actual actions inside each case (print or call reduceBitrate).</span>';}else{out.innerHTML='<span class="output-err">✗ Make sure all four cases are present: nominal, fair, serious, critical. Add a print or action inside each one.</span>';}}
+buildChecklist();updateSim();
+</script>
+</body>
+</html>
